@@ -12,7 +12,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.golfapp.gsa51.ui.theme.screens.FinalScoreDetailsScreen
+
 import com.golfapp.gsa51.ui.theme.screens.GameDetailsScreen
 import com.golfapp.gsa51.ui.theme.screens.IndividualGameSettingsScreen
 import com.golfapp.gsa51.ui.theme.screens.ResultsScreen
@@ -22,7 +22,8 @@ import com.golfapp.gsa51.ui.theme.screens.TeamPairingsScreen
 import android.content.Intent
 import androidx.compose.ui.platform.LocalContext
 import com.golfapp.gsa51.ui.theme.screens.SavedGamesScreen
-
+// Change this import (the actual path may vary based on your project structure)
+import com.golfapp.gsa51.ui.theme.screens.FinalScoreDetailsScreen
 
 // Define navigation routes
 sealed class Screen(val route: String) {

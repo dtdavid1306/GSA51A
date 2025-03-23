@@ -51,6 +51,16 @@ class ResultsViewModel(
     var isLoading by mutableStateOf(false)
         private set
 
+    // Private backing field with direct assignment
+    private val _isSharing = mutableStateOf(false)
+    // Public read-only property
+    val isSharing: Boolean get() = _isSharing.value
+
+    // Method to update state
+    fun setSharing(sharing: Boolean) {
+        _isSharing.value = sharing
+    }
+
     // Render scores table for screenshot
     @Composable
     fun ScoresTableForCapture() {

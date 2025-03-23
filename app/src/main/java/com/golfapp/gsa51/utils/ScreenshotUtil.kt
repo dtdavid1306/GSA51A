@@ -3,85 +3,100 @@ package com.golfapp.gsa51.utils
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
-import androidx.compose.foundation.layout.Box
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.graphics.drawscope.draw
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.layout.boundsInWindow
-import androidx.compose.ui.layout.onGloballyPositioned
+import android.util.Log
+import android.view.View
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.core.content.FileProvider
+import androidx.core.view.drawToBitmap
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
 object ScreenshotUtil {
+    /**
+     * Captures a view and saves it to a temporary file
+     *
+     * @param context The application context
+     * @param view The View to capture
+     * @param filename The name to use for the temporary file
+     * @return The Uri of the saved image, or null if capture failed
+     */
+    fun captureViewToUri(
+        context: Context,
+        view: View,
+        filename: String = "screenshot.png"
+    ): Uri? {
+        try {
+            // Capture the view to a bitmap
+            val bitmap = view.drawToBitmap(Bitmap.Config.ARGB_8888)
 
-    // Save bitmap to a temporary file and get its URI for sharing
-    fun saveBitmapToTempFile(context: Context, bitmap: Bitmap, fileName: String): Uri? {
-        val imagesDir = File(context.cacheDir, "images")
-        if (!imagesDir.exists()) {
-            imagesDir.mkdirs()
-        }
+            // Save the bitmap to a temporary file
+            val cachePath = File(context.cacheDir, "screenshots")
+            cachePath.mkdirs()
 
-        val imageFile = File(imagesDir, fileName)
+            val file = File(cachePath, filename)
 
-        return try {
-            FileOutputStream(imageFile).use { out ->
+            FileOutputStream(file).use { out ->
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
             }
 
-            FileProvider.getUriForFile(
+            // Get a URI for the file using FileProvider
+            return FileProvider.getUriForFile(
                 context,
                 "${context.packageName}.fileprovider",
-                imageFile
+                file
             )
-        } catch (e: IOException) {
-            e.printStackTrace()
-            null
+        } catch (e: Exception) {
+            Log.e("ScreenshotUtil", "Error capturing view to URI", e)
+            return null
         }
     }
-}
 
-// This is a new helper function we'll add to ResultsScreen.kt
-// It uses callbacks to safely capture screenshots from composable context
-@Composable
-fun CaptureComposable(
-    content: @Composable () -> Unit,
-    onCaptured: (Bitmap?) -> Unit
-) {
-    val context = LocalContext.current
-    val view = LocalView.current.rootView
-    val captureRequested = remember { mutableStateOf(false) }
+    /**
+     * Fallback method that creates a basic image with text
+     * Used when proper view capture fails
+     */
+    fun createBasicImage(
+        context: Context,
+        filename: String = "screenshot.png"
+    ): Uri? {
+        try {
+            // Create a basic bitmap
+            val bitmap = Bitmap.createBitmap(800, 600, Bitmap.Config.ARGB_8888)
+            val canvas = android.graphics.Canvas(bitmap)
 
-    Box(
-        modifier = Modifier.onGloballyPositioned { coordinates ->
-            if (captureRequested.value) {
-                try {
-                    val bitmap = Bitmap.createBitmap(
-                        coordinates.size.width,
-                        coordinates.size.height,
-                        Bitmap.Config.ARGB_8888
-                    )
-                    val canvas = android.graphics.Canvas(bitmap)
-                    view.draw(canvas)
-                    onCaptured(bitmap)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    onCaptured(null)
-                } finally {
-                    captureRequested.value = false
-                }
+            // Draw a white background
+            canvas.drawColor(android.graphics.Color.WHITE)
+
+            // Create a text paint
+            val paint = android.graphics.Paint().apply {
+                color = android.graphics.Color.BLACK
+                textSize = 30f
             }
+
+            // Draw some basic text
+            canvas.drawText("Golf Score Report", 50f, 50f, paint)
+            canvas.drawText("See text report for details", 50f, 100f, paint)
+
+            // Save the bitmap to a temporary file
+            val cachePath = File(context.cacheDir, "screenshots")
+            cachePath.mkdirs()
+
+            val file = File(cachePath, filename)
+
+            FileOutputStream(file).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            }
+
+            // Get a URI for the file using FileProvider
+            return FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file
+            )
+        } catch (e: Exception) {
+            Log.e("ScreenshotUtil", "Error creating basic image", e)
+            return null
         }
-    ) {
-        content()
     }
 }

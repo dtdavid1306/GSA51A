@@ -14,14 +14,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.golfapp.gsa51.R
 import com.golfapp.gsa51.ui.theme.GSAPurple
 import com.golfapp.gsa51.viewmodels.AppViewModelProvider
 import com.golfapp.gsa51.viewmodels.FinalScoreDetailsViewModel
-import android.content.Intent
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,6 +40,7 @@ fun FinalScoreDetailsScreen(
 
     Scaffold(
         topBar = {
+            // Standard TopAppBar to match other screens in the app
             CenterAlignedTopAppBar(
                 title = { Text("Final Score Details", color = Color.White) },
                 navigationIcon = {
@@ -70,40 +69,34 @@ fun FinalScoreDetailsScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 8.dp)
+                    .padding(paddingValues) // This respects the top bar padding
+                    .padding(horizontal = 4.dp) // Small horizontal padding
                     .verticalScroll(scrollState)
             ) {
-                Text(
-                    text = "Final Score Details",
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
-                )
-
-                // Legend Row
-                ScoreLegend()
+                // Compact legend with proper spacing
+                CompactScoreLegend()
 
                 // Scores Table Header
-                ScoresTableHeader(viewModel)
+                CompactScoresTableHeader(viewModel)
 
                 // Scores Table Rows
                 for (holeNumber in 1..18) {
-                    ScoreTableRow(holeNumber, viewModel)
+                    CompactScoreTableRow(holeNumber, viewModel)
                 }
 
                 // Total Row
-                TotalScoreRow(viewModel)
+                CompactTotalScoreRow(viewModel)
 
                 // Back to Results Button
                 Button(
                     onClick = onNavigateBack,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
+                        .padding(8.dp)
                         .height(48.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = GSAPurple)
                 ) {
-                    Text("BACK TO RESULTS")
+                    Text("BACK TO RESULTS", fontSize = 14.sp)
                 }
             }
         }
@@ -111,17 +104,17 @@ fun FinalScoreDetailsScreen(
 }
 
 @Composable
-fun ScoreLegend() {
+fun CompactScoreLegend() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(4.dp),
+            .padding(vertical = 4.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = "Legend:",
-            style = MaterialTheme.typography.bodyMedium,
-            fontSize = 12.sp, // CHANGE: Smaller font size
+            style = MaterialTheme.typography.bodySmall,
+            fontSize = 11.sp,
             modifier = Modifier.padding(end = 4.dp)
         )
 
@@ -129,45 +122,45 @@ fun ScoreLegend() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            LegendItem("Eagle+", Color(0xFF388E3C))
-            LegendItem("Birdie", Color(0xFF7CB342))
-            LegendItem("Par", Color(0xFF2196F3))
-            LegendItem("Bogey", Color(0xFFF44336))
-            LegendItem("Double+", Color(0xFFD32F2F))
+            CompactLegendItem("Eagle+", Color(0xFF388E3C))
+            CompactLegendItem("Birdie", Color(0xFF7CB342))
+            CompactLegendItem("Par", Color(0xFF2196F3))
+            CompactLegendItem("Bogey", Color(0xFFF44336))
+            CompactLegendItem("Double+", Color(0xFFD32F2F))
         }
     }
 }
 
 @Composable
-fun LegendItem(text: String, color: Color) {
+fun CompactLegendItem(text: String, color: Color) {
     Surface(
-        modifier = Modifier.padding(end = 2.dp), // CHANGE: Reduced padding
+        modifier = Modifier.padding(end = 2.dp),
         color = color,
         shape = MaterialTheme.shapes.small
     ) {
         Text(
             text = text,
             color = Color.White,
-            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp), // CHANGE: Reduced padding
-            style = MaterialTheme.typography.labelMedium,
-            fontSize = 10.sp // CHANGE: Smaller font size
+            modifier = Modifier.padding(horizontal = 3.dp, vertical = 2.dp),
+            style = MaterialTheme.typography.labelSmall,
+            fontSize = 9.sp
         )
     }
 }
 
 @Composable
-fun ScoresTableHeader(viewModel: FinalScoreDetailsViewModel) {
+fun CompactScoresTableHeader(viewModel: FinalScoreDetailsViewModel) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(GSAPurple) // CHANGE: Use GSAPurple instead of generic purple
-            .padding(2.dp) // CHANGE: Reduced from 4.dp to 2.dp
+            .background(GSAPurple)
+            .padding(2.dp)
     ) {
         // Hole column
         Box(
             modifier = Modifier
                 .weight(0.15f)
-                .padding(2.dp), // CHANGE: Reduced from 4.dp to 2.dp
+                .padding(2.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -175,7 +168,7 @@ fun ScoresTableHeader(viewModel: FinalScoreDetailsViewModel) {
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
-                fontSize = 12.sp // CHANGE: Added smaller font size
+                fontSize = 11.sp
             )
         }
 
@@ -183,7 +176,7 @@ fun ScoresTableHeader(viewModel: FinalScoreDetailsViewModel) {
         Box(
             modifier = Modifier
                 .weight(0.15f)
-                .padding(2.dp), // CHANGE: Reduced from 4.dp to 2.dp
+                .padding(2.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -191,7 +184,7 @@ fun ScoresTableHeader(viewModel: FinalScoreDetailsViewModel) {
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
-                fontSize = 12.sp // CHANGE: Added smaller font size
+                fontSize = 11.sp
             )
         }
 
@@ -201,7 +194,7 @@ fun ScoresTableHeader(viewModel: FinalScoreDetailsViewModel) {
             Box(
                 modifier = Modifier
                     .weight(playerCellWidth)
-                    .padding(2.dp), // CHANGE: Reduced from 4.dp to 2.dp
+                    .padding(2.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -209,7 +202,7 @@ fun ScoresTableHeader(viewModel: FinalScoreDetailsViewModel) {
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
-                    fontSize = 12.sp // CHANGE: Added smaller font size
+                    fontSize = 11.sp
                 )
             }
         }
@@ -217,7 +210,7 @@ fun ScoresTableHeader(viewModel: FinalScoreDetailsViewModel) {
 }
 
 @Composable
-fun ScoreTableRow(holeNumber: Int, viewModel: FinalScoreDetailsViewModel) {
+fun CompactScoreTableRow(holeNumber: Int, viewModel: FinalScoreDetailsViewModel) {
     val holeScores = viewModel.scoresByHole[holeNumber] ?: emptyMap()
 
     // Get the par for this hole
@@ -227,39 +220,40 @@ fun ScoreTableRow(holeNumber: Int, viewModel: FinalScoreDetailsViewModel) {
         modifier = Modifier
             .fillMaxWidth()
             .background(if (holeNumber % 2 == 0) Color(0xFFF5F5F5) else Color.White)
-            .padding(2.dp) // CHANGE: Reduced from 4.dp to 2.dp
+            .padding(1.dp)
+            .height(24.dp) // Slightly increased height for better readability
     ) {
-        // Hole column - make more compact
+        // Hole column
         Box(
             modifier = Modifier
                 .weight(0.15f)
-                .padding(2.dp), // CHANGE: Reduced from 4.dp to 2.dp
+                .padding(1.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Hole $holeNumber",
+                text = "$holeNumber",
                 color = Color(0xFF616161),
                 textAlign = TextAlign.Center,
-                fontSize = 12.sp // CHANGE: Added smaller font size
+                fontSize = 11.sp
             )
         }
 
-        // Par column - make more compact
+        // Par column
         Box(
             modifier = Modifier
                 .weight(0.15f)
-                .padding(2.dp), // CHANGE: Reduced from 4.dp to 2.dp
+                .padding(1.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = par.toString(),
                 color = Color(0xFF616161),
                 textAlign = TextAlign.Center,
-                fontSize = 12.sp // CHANGE: Added smaller font size
+                fontSize = 11.sp
             )
         }
 
-        // Player score columns - make more compact
+        // Player score columns
         val playerCellWidth = 0.7f / viewModel.players.size
         viewModel.players.forEach { player ->
             val score = holeScores[player.id]
@@ -277,28 +271,28 @@ fun ScoreTableRow(holeNumber: Int, viewModel: FinalScoreDetailsViewModel) {
                     modifier = Modifier
                         .weight(playerCellWidth)
                         .background(backgroundColor)
-                        .padding(2.dp), // CHANGE: Reduced from 4.dp to 2.dp
+                        .padding(1.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = score.score.toString(),
                         color = Color.White,
                         textAlign = TextAlign.Center,
-                        fontSize = 12.sp // CHANGE: Added smaller font size
+                        fontSize = 11.sp
                     )
                 }
             } else {
                 Box(
                     modifier = Modifier
                         .weight(playerCellWidth)
-                        .padding(2.dp), // CHANGE: Reduced from 4.dp to 2.dp
+                        .padding(1.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "-",
                         color = Color(0xFF616161),
                         textAlign = TextAlign.Center,
-                        fontSize = 12.sp // CHANGE: Added smaller font size
+                        fontSize = 11.sp
                     )
                 }
             }
@@ -307,18 +301,19 @@ fun ScoreTableRow(holeNumber: Int, viewModel: FinalScoreDetailsViewModel) {
 }
 
 @Composable
-fun TotalScoreRow(viewModel: FinalScoreDetailsViewModel) {
+fun CompactTotalScoreRow(viewModel: FinalScoreDetailsViewModel) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color(0xFFE0E0E0))
-            .padding(2.dp) // CHANGE: Reduced from 4.dp to 2.dp
+            .padding(1.dp)
+            .height(24.dp) // Match row height
     ) {
         // Total label
         Box(
             modifier = Modifier
                 .weight(0.15f)
-                .padding(2.dp), // CHANGE: Reduced from 4.dp to 2.dp
+                .padding(1.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -326,7 +321,7 @@ fun TotalScoreRow(viewModel: FinalScoreDetailsViewModel) {
                 color = Color(0xFF212121),
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
-                fontSize = 12.sp // CHANGE: Added smaller font size
+                fontSize = 11.sp
             )
         }
 
@@ -334,7 +329,7 @@ fun TotalScoreRow(viewModel: FinalScoreDetailsViewModel) {
         Box(
             modifier = Modifier
                 .weight(0.15f)
-                .padding(2.dp), // CHANGE: Reduced from 4.dp to 2.dp
+                .padding(1.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -342,7 +337,7 @@ fun TotalScoreRow(viewModel: FinalScoreDetailsViewModel) {
                 color = Color(0xFF212121),
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
-                fontSize = 12.sp // CHANGE: Added smaller font size
+                fontSize = 11.sp
             )
         }
 
@@ -353,7 +348,7 @@ fun TotalScoreRow(viewModel: FinalScoreDetailsViewModel) {
             Box(
                 modifier = Modifier
                     .weight(playerCellWidth)
-                    .padding(2.dp), // CHANGE: Reduced from 4.dp to 2.dp
+                    .padding(1.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -361,7 +356,7 @@ fun TotalScoreRow(viewModel: FinalScoreDetailsViewModel) {
                     color = Color(0xFF212121),
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
-                    fontSize = 12.sp // CHANGE: Added smaller font size
+                    fontSize = 11.sp
                 )
             }
         }
