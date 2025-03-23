@@ -20,12 +20,14 @@ import com.golfapp.gsa51.R
 import com.golfapp.gsa51.ui.theme.GSAPurple
 import com.golfapp.gsa51.viewmodels.AppViewModelProvider
 import com.golfapp.gsa51.viewmodels.FinalScoreDetailsViewModel
+import com.golfapp.gsa51.ui.theme.components.GSATopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FinalScoreDetailsScreen(
     gameId: Long,
     onNavigateBack: () -> Unit,
+    onNavigateToGameRules: () -> Unit,
     viewModel: FinalScoreDetailsViewModel = viewModel(
         factory = AppViewModelProvider.Factory,
         key = "finalScoreDetails_$gameId"
@@ -40,21 +42,11 @@ fun FinalScoreDetailsScreen(
 
     Scaffold(
         topBar = {
-            // Standard TopAppBar to match other screens in the app
-            CenterAlignedTopAppBar(
-                title = { Text("Final Score Details", color = Color.White) },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_back),
-                            contentDescription = "Back",
-                            tint = Color.White
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = GSAPurple
-                )
+            GSATopAppBar(
+                title = "Final Score Details",
+                showBackButton = true,
+                onBackClick = onNavigateBack,
+                onInfoClick = onNavigateToGameRules
             )
         }
     ) { paddingValues ->
@@ -102,6 +94,9 @@ fun FinalScoreDetailsScreen(
         }
     }
 }
+
+// Keep the existing helper composables
+// ... (Rest of the implementation remains the same)
 
 @Composable
 fun CompactScoreLegend() {

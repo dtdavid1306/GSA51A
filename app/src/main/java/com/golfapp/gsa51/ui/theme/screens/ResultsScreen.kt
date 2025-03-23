@@ -36,6 +36,7 @@ import java.util.*
 import android.app.Activity
 import android.util.Log
 import android.view.ViewGroup
+import com.golfapp.gsa51.ui.theme.components.GSATopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,6 +45,7 @@ fun ResultsScreen(
     onNavigateToScoreDetails: (Long) -> Unit,
     onNavigateToNewGame: () -> Unit,
     onNavigateBack: () -> Unit,
+    onNavigateToGameRules: () -> Unit,
     viewModel: ResultsViewModel = viewModel(
         factory = AppViewModelProvider.Factory,
         key = "results_$gameId"
@@ -73,20 +75,11 @@ fun ResultsScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Results", color = Color.White) },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_back),
-                            contentDescription = "Back",
-                            tint = Color.White
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = GSAPurple
-                )
+            GSATopAppBar(
+                title = "Results",
+                showBackButton = true,
+                onBackClick = onNavigateBack,
+                onInfoClick = onNavigateToGameRules
             )
         }
     ) { paddingValues ->

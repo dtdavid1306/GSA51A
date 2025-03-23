@@ -19,6 +19,7 @@ import com.golfapp.gsa51.viewmodels.AppViewModelProvider
 import com.golfapp.gsa51.viewmodels.SavedGamesViewModel
 import java.text.SimpleDateFormat
 import java.util.*
+import com.golfapp.gsa51.ui.theme.components.GSATopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,24 +27,16 @@ fun SavedGamesScreen(
     onNavigateBack: () -> Unit,
     onResumeGame: (Long) -> Unit,
     onNewGame: () -> Unit,
+    onNavigateToGameRules: () -> Unit,
     viewModel: SavedGamesViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Saved Games", color = Color.White) },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_back),
-                            contentDescription = "Back",
-                            tint = Color.White
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = GSAPurple
-                )
+            GSATopAppBar(
+                title = "Saved Games",
+                showBackButton = true,
+                onBackClick = onNavigateBack,
+                onInfoClick = onNavigateToGameRules
             )
         }
     ) { paddingValues ->

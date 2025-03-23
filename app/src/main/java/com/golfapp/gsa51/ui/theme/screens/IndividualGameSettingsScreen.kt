@@ -18,15 +18,16 @@ import com.golfapp.gsa51.data.entities.Player
 import com.golfapp.gsa51.ui.theme.GSAPurple
 import com.golfapp.gsa51.viewmodels.AppViewModelProvider
 import com.golfapp.gsa51.viewmodels.IndividualGameSettingsViewModel
-// Add this import at the top of IndividualGameSettingsScreen.kt
 import com.golfapp.gsa51.R
+import com.golfapp.gsa51.ui.theme.components.GSATopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IndividualGameSettingsScreen(
     gameId: Long,
     onNavigateToTeamPairings: (Long) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToGameRules: () -> Unit
 ) {
     // Create the ViewModel with the game ID
     val viewModel = viewModel<IndividualGameSettingsViewModel>(
@@ -44,20 +45,11 @@ fun IndividualGameSettingsScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("GSA21", color = Color.White) },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_back),
-                            contentDescription = "Back",
-                            tint = Color.White
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = GSAPurple
-                )
+            GSATopAppBar(
+                title = "Individual Game Settings",
+                showBackButton = true,
+                onBackClick = onNavigateBack,
+                onInfoClick = onNavigateToGameRules
             )
         }
     ) { paddingValues ->

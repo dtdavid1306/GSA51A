@@ -25,13 +25,15 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.ui.draw.rotate
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.golfapp.gsa51.ui.theme.components.GSATopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TeamPairingsScreen(
     gameId: Long,
     onNavigateToScoring: (Long) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToGameRules: () -> Unit
 ) {
     // Create the ViewModel with the game ID
     val viewModel = viewModel<TeamPairingViewModel>(
@@ -51,20 +53,11 @@ fun TeamPairingsScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("GSA21", color = Color.White) },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_back),
-                            contentDescription = "Back",
-                            tint = Color.White
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = GSAPurple
-                )
+            GSATopAppBar(
+                title = "Team Pairings",
+                showBackButton = true,
+                onBackClick = onNavigateBack,
+                onInfoClick = onNavigateToGameRules
             )
         }
     ) { paddingValues ->

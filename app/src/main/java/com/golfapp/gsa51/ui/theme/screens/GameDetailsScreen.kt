@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
+import com.golfapp.gsa51.ui.theme.components.GSATopAppBar
 
 // Define the GSA purple color
 val GSAPurple = Color(0xFF6200EE)
@@ -49,29 +50,14 @@ fun GameDetailsScreen(
 
     Scaffold(
         topBar = {
-            SmallTopAppBar(
-                title = { Text("Game Details", color = Color.White) },
-                navigationIcon = {
-                    IconButton(onClick = { showExitDialog = true }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_back),
-                            contentDescription = "Back",
-                            tint = Color.White
-                        )
-                    }
+            GSATopAppBar(
+                title = "Game Details",
+                showBackButton = true,  // Show back button
+                onBackClick = {
+                    // Show confirmation dialog before exiting
+                    showExitDialog = true
                 },
-                actions = {
-                    IconButton(onClick = { onNavigateToGameRules() }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_info),
-                            contentDescription = "Game Rules",
-                            tint = Color.White
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = GSAPurple
-                )
+                onInfoClick = onNavigateToGameRules
             )
         }
     ) { paddingValues ->

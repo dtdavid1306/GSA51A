@@ -26,13 +26,15 @@ import com.golfapp.gsa51.ui.theme.GSAPurple
 import com.golfapp.gsa51.viewmodels.AppViewModelProvider
 import com.golfapp.gsa51.viewmodels.ScoringViewModel
 import kotlinx.coroutines.delay
+import com.golfapp.gsa51.ui.theme.components.GSATopAppBar
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ScoringScreen(
     gameId: Long,
     onNavigateToResults: (Long) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToGameRules: () -> Unit
 ) {
     // Initialize the ViewModel
     val viewModel = viewModel<ScoringViewModel>(
@@ -114,29 +116,20 @@ fun ScoringScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Scoring", color = Color.White) },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        if (viewModel.hasUnsavedChanges) {
-                            // Auto-save before navigating back
-                            viewModel.autoSave {
-                                onNavigateBack()
-                            }
-                        } else {
+            GSATopAppBar(
+                title = "Scoring",
+                showBackButton = true,
+                onBackClick = {
+                    if (viewModel.hasUnsavedChanges) {
+                        // Auto-save before navigating back
+                        viewModel.autoSave {
                             onNavigateBack()
                         }
-                    }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_back),
-                            contentDescription = "Back",
-                            tint = Color.White
-                        )
+                    } else {
+                        onNavigateBack()
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = GSAPurple
-                )
+                onInfoClick = onNavigateToGameRules
             )
         }
     ) { paddingValues ->

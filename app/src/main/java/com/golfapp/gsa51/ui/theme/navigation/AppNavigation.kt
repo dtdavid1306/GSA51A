@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 
 import com.golfapp.gsa51.ui.theme.screens.GameDetailsScreen
+import com.golfapp.gsa51.ui.theme.screens.GameRulesScreen
 import com.golfapp.gsa51.ui.theme.screens.IndividualGameSettingsScreen
 import com.golfapp.gsa51.ui.theme.screens.ResultsScreen
 import com.golfapp.gsa51.ui.theme.screens.ScoringScreen
@@ -22,7 +23,6 @@ import com.golfapp.gsa51.ui.theme.screens.TeamPairingsScreen
 import android.content.Intent
 import androidx.compose.ui.platform.LocalContext
 import com.golfapp.gsa51.ui.theme.screens.SavedGamesScreen
-// Change this import (the actual path may vary based on your project structure)
 import com.golfapp.gsa51.ui.theme.screens.FinalScoreDetailsScreen
 
 // Define navigation routes
@@ -35,6 +35,7 @@ sealed class Screen(val route: String) {
     object Results : Screen("results/{gameId}")
     object FinalScoreDetails : Screen("final_score_details/{gameId}")
     object SavedGames : Screen("saved_games")
+    object GameRules : Screen("game_rules")
 
     fun createRoute(vararg args: Pair<String, String>): String {
         var result = route
@@ -62,6 +63,7 @@ fun AppNavigation(navController: NavHostController) {
         }
 
         composable(Screen.GameDetails.route) {
+            val context = LocalContext.current
             GameDetailsScreen(
                 onNavigateToIndividualSettings = { gameId ->
                     navController.navigate(
@@ -69,10 +71,11 @@ fun AppNavigation(navController: NavHostController) {
                     )
                 },
                 onExitApp = {
-                    // Handle exit app action
+                    // This will finish the current activity (close the app)
+                    (context as? android.app.Activity)?.finish()
                 },
                 onNavigateToGameRules = {
-                    // Handle navigation to game rules
+                    navController.navigate(Screen.GameRules.route)
                 },
                 onNavigateToSavedGames = {
                     navController.navigate(Screen.SavedGames.route)
@@ -93,9 +96,13 @@ fun AppNavigation(navController: NavHostController) {
                 },
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onNavigateToGameRules = {
+                    navController.navigate(Screen.GameRules.route)
                 }
             )
         }
+
         composable(Screen.SavedGames.route) {
             SavedGamesScreen(
                 onNavigateBack = {
@@ -110,9 +117,13 @@ fun AppNavigation(navController: NavHostController) {
                     navController.navigate(Screen.GameDetails.route) {
                         popUpTo(Screen.SavedGames.route) { inclusive = true }
                     }
+                },
+                onNavigateToGameRules = {
+                    navController.navigate(Screen.GameRules.route)
                 }
             )
         }
+
         composable(
             route = Screen.TeamPairings.route,
             arguments = listOf(navArgument("gameId") { type = NavType.LongType })
@@ -126,9 +137,13 @@ fun AppNavigation(navController: NavHostController) {
                 },
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onNavigateToGameRules = {
+                    navController.navigate(Screen.GameRules.route)
                 }
             )
         }
+
         composable(
             route = Screen.Results.route,
             arguments = listOf(navArgument("gameId") { type = NavType.LongType })
@@ -147,10 +162,13 @@ fun AppNavigation(navController: NavHostController) {
                 },
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onNavigateToGameRules = {
+                    navController.navigate(Screen.GameRules.route)
                 }
-                // Note: onShareResults is now handled directly in the ResultsScreen
             )
         }
+
         composable(
             route = Screen.Scoring.route,
             arguments = listOf(navArgument("gameId") { type = NavType.LongType })
@@ -164,9 +182,13 @@ fun AppNavigation(navController: NavHostController) {
                 },
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onNavigateToGameRules = {
+                    navController.navigate(Screen.GameRules.route)
                 }
             )
         }
+
         composable(
             route = Screen.FinalScoreDetails.route,
             arguments = listOf(navArgument("gameId") { type = NavType.LongType })
@@ -175,27 +197,15 @@ fun AppNavigation(navController: NavHostController) {
 
             FinalScoreDetailsScreen(
                 gameId = gameId,
-                onNavigateBack = {
-                    navController.popBackStack()
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToGameRules = {
+                    navController.navigate(Screen.GameRules.route)
                 }
             )
         }
-        composable(
-            route = Screen.Results.route,
-            arguments = listOf(navArgument("gameId") { type = NavType.LongType })
-        ) { backStackEntry ->
-            val gameId = backStackEntry.arguments?.getLong("gameId") ?: -1L
 
-            ResultsScreen(
-                gameId = gameId,
-                onNavigateToScoreDetails = { id ->
-                    navController.navigate(Screen.FinalScoreDetails.createRoute("gameId" to id.toString()))
-                },
-                onNavigateToNewGame = {
-                    navController.navigate(Screen.GameDetails.route) {
-                        popUpTo(Screen.GameDetails.route) { inclusive = true }
-                    }
-                },
+        composable(Screen.GameRules.route) {
+            GameRulesScreen(
                 onNavigateBack = {
                     navController.popBackStack()
                 }
