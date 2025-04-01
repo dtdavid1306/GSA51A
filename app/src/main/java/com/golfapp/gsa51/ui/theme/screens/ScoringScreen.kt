@@ -339,7 +339,7 @@ fun ScoringScreen(
                             },
                             placeholder = { Text("Score") },
                             modifier = Modifier
-                                .width(70.dp) // Slightly narrower
+                                .width(80.dp) // Slightly narrower
                                 .then(
                                     if (index == 0)
                                         Modifier.focusRequester(firstPlayerScoreFocus)
@@ -349,7 +349,7 @@ fun ScoringScreen(
                             singleLine = true,
                             textStyle = LocalTextStyle.current.copy(
                                 textAlign = TextAlign.Center,
-                                fontSize = 16.sp // Slightly smaller font
+                                fontSize = 14.sp // Slightly smaller font
                             ),
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Number,

@@ -27,6 +27,7 @@ import java.util.*
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import com.golfapp.gsa51.ui.theme.components.GSATopAppBar
+import com.golfapp.gsa51.ui.theme.components.Tooltip
 
 // Define the GSA purple color
 val GSAPurple = Color(0xFF6200EE)
@@ -43,6 +44,8 @@ fun GameDetailsScreen(
     val scrollState = rememberScrollState()
     var showDatePicker by remember { mutableStateOf(false) }
     var showExitDialog by remember { mutableStateOf(false) }
+    var showStartingHoleTooltip by remember { mutableStateOf(false) }
+    var showPlayersTooltip by remember { mutableStateOf(false) }
 
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -196,7 +199,7 @@ fun GameDetailsScreen(
                             style = MaterialTheme.typography.bodyMedium
                         )
                         IconButton(
-                            onClick = { /* Show info about starting hole */ },
+                            onClick = { showStartingHoleTooltip = true },
                             modifier = Modifier.size(16.dp)
                         ) {
                             Icon(
@@ -206,6 +209,13 @@ fun GameDetailsScreen(
                                 tint = GSAPurple
                             )
                         }
+                    }
+                    // Show the tooltip if state is true
+                    if (showStartingHoleTooltip) {
+                        Tooltip(
+                            text = "The starting hole determines the rotation of team pairings. Each pairing plays for 6 holes, and the sequence begins from the starting hole you select. For example, if you choose hole 14, the first pairing will play holes 14-18 and hole 1.",
+                            onDismissRequest = { showStartingHoleTooltip = false }
+                        )
                     }
                     TextField(
                         value = if (viewModel.startingHole == 0) "" else viewModel.startingHole.toString(),
@@ -251,7 +261,7 @@ fun GameDetailsScreen(
                     style = MaterialTheme.typography.titleMedium
                 )
                 IconButton(
-                    onClick = { /* Show player info */ },
+                    onClick = { showPlayersTooltip = true },
                     modifier = Modifier.size(16.dp)
                 ) {
                     Icon(
@@ -262,7 +272,13 @@ fun GameDetailsScreen(
                     )
                 }
             }
-
+// Show the tooltip if state is true
+            if (showPlayersTooltip) {
+                Tooltip(
+                    text = "Enter the names of all four players. These names will be used throughout the game for scoring and team pairings. Each player will compete individually and as part of rotating teams.",
+                    onDismissRequest = { showPlayersTooltip = false }
+                )
+            }
             // Player 1
             Text(
                 text = "Player 1",
