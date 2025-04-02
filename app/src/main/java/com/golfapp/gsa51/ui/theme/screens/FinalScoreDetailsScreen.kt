@@ -95,9 +95,6 @@ fun FinalScoreDetailsScreen(
     }
 }
 
-// Keep the existing helper composables
-// ... (Rest of the implementation remains the same)
-
 @Composable
 fun CompactScoreLegend() {
     Row(
@@ -208,15 +205,15 @@ fun CompactScoresTableHeader(viewModel: FinalScoreDetailsViewModel) {
 fun CompactScoreTableRow(holeNumber: Int, viewModel: FinalScoreDetailsViewModel) {
     val holeScores = viewModel.scoresByHole[holeNumber] ?: emptyMap()
 
-    // Get the par for this hole
-    val par = holeScores.values.firstOrNull()?.par ?: 4 // Default to par 4 if not available
+    // Get the par for this hole (may be null or 0 if not set)
+    val par = holeScores.values.firstOrNull()?.par ?: 0
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(if (holeNumber % 2 == 0) Color(0xFFF5F5F5) else Color.White)
             .padding(1.dp)
-            .height(24.dp) // Slightly increased height for better readability
+            .height(24.dp)
     ) {
         // Hole column
         Box(
@@ -241,7 +238,7 @@ fun CompactScoreTableRow(holeNumber: Int, viewModel: FinalScoreDetailsViewModel)
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = par.toString(),
+                text = if (par > 0) par.toString() else "-",
                 color = Color(0xFF616161),
                 textAlign = TextAlign.Center,
                 fontSize = 11.sp
@@ -253,13 +250,19 @@ fun CompactScoreTableRow(holeNumber: Int, viewModel: FinalScoreDetailsViewModel)
         viewModel.players.forEach { player ->
             val score = holeScores[player.id]
             if (score != null) {
-                val colorType = viewModel.getScoreColorType(score.score, score.par)
-                val backgroundColor = when (colorType) {
-                    FinalScoreDetailsViewModel.ScoreColorType.EAGLE_PLUS -> Color(0xFF388E3C)
-                    FinalScoreDetailsViewModel.ScoreColorType.BIRDIE -> Color(0xFF7CB342)
-                    FinalScoreDetailsViewModel.ScoreColorType.PAR -> Color(0xFF2196F3)
-                    FinalScoreDetailsViewModel.ScoreColorType.BOGEY -> Color(0xFFF44336)
-                    FinalScoreDetailsViewModel.ScoreColorType.DOUBLE_PLUS -> Color(0xFFD32F2F)
+                // Only apply color coding if par value exists and is valid
+                val backgroundColor = if (score.par > 0) {
+                    val colorType = viewModel.getScoreColorType(score.score, score.par)
+                    when (colorType) {
+                        FinalScoreDetailsViewModel.ScoreColorType.EAGLE_PLUS -> Color(0xFF388E3C)
+                        FinalScoreDetailsViewModel.ScoreColorType.BIRDIE -> Color(0xFF7CB342)
+                        FinalScoreDetailsViewModel.ScoreColorType.PAR -> Color(0xFF2196F3)
+                        FinalScoreDetailsViewModel.ScoreColorType.BOGEY -> Color(0xFFF44336)
+                        FinalScoreDetailsViewModel.ScoreColorType.DOUBLE_PLUS -> Color(0xFFD32F2F)
+                    }
+                } else {
+                    // No color coding (white) when par is not set
+                    Color.White
                 }
 
                 Box(
@@ -271,7 +274,7 @@ fun CompactScoreTableRow(holeNumber: Int, viewModel: FinalScoreDetailsViewModel)
                 ) {
                     Text(
                         text = score.score.toString(),
-                        color = Color.White,
+                        color = if (score.par > 0) Color.White else Color(0xFF616161), // Text color depends on background
                         textAlign = TextAlign.Center,
                         fontSize = 11.sp
                     )

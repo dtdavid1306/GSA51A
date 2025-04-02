@@ -263,77 +263,62 @@ class ScoringViewModel(
         autoSave()
     }
 
-    // Navigate to next hole
+    // Navigate to next hole - UPDATED: removed Par validation
     fun nextHole() {
-        if (!isParValid()) {
-            setError("Please enter a par value (3-5)")
-            return
-        }
-
         if (hasUnsavedChanges) {
             autoSave {
                 // Allow circular navigation from hole 18 to hole 1
                 currentHole = if (currentHole == 18) 1 else currentHole + 1
                 loadScoresForCurrentHole()
                 updateCurrentSection()
-                updateCurrentHoleInGame() // Add this line
+                updateCurrentHoleInGame()
             }
         } else {
             // Allow circular navigation from hole 18 to hole 1
             currentHole = if (currentHole == 18) 1 else currentHole + 1
             loadScoresForCurrentHole()
             updateCurrentSection()
-            updateCurrentHoleInGame() // Add this line
+            updateCurrentHoleInGame()
         }
     }
 
-    // Navigate to previous hole
+    // Navigate to previous hole - UPDATED: removed Par validation
     fun previousHole() {
-        if (!isParValid()) {
-            setError("Please enter a par value (3-5)")
-            return
-        }
-
         if (hasUnsavedChanges) {
             autoSave {
                 // Allow circular navigation from hole 1 to hole 18
                 currentHole = if (currentHole == 1) 18 else currentHole - 1
                 loadScoresForCurrentHole()
                 updateCurrentSection()
-                updateCurrentHoleInGame() // Add this line
+                updateCurrentHoleInGame()
             }
         } else {
             // Allow circular navigation from hole 1 to hole 18
             currentHole = if (currentHole == 1) 18 else currentHole - 1
             loadScoresForCurrentHole()
             updateCurrentSection()
-            updateCurrentHoleInGame() // Add this line
+            updateCurrentHoleInGame()
         }
     }
 
-    // Navigate to specific hole
+    // Navigate to specific hole - UPDATED: removed Par validation
     fun navigateToHole(holeStr: String) {
         val hole = holeStr.toIntOrNull()
         if (hole != null && hole in 1..18) {
-            if (!isParValid()) {
-                setError("Please enter a par value (3-5)")
-                return
-            }
-
             if (hasUnsavedChanges) {
                 autoSave {
                     currentHole = hole
                     loadScoresForCurrentHole()
                     updateCurrentSection()
                     navigateToHoleInput = ""
-                    updateCurrentHoleInGame() // Add this line
+                    updateCurrentHoleInGame()
                 }
             } else {
                 currentHole = hole
                 loadScoresForCurrentHole()
                 updateCurrentSection()
                 navigateToHoleInput = ""
-                updateCurrentHoleInGame() // Add this line
+                updateCurrentHoleInGame()
             }
         } else {
             setError("Please enter a valid hole number (1-18)")
@@ -367,6 +352,7 @@ class ScoringViewModel(
             }
         }
     }
+
     // Update current section based on hole number and starting hole
     private fun updateCurrentSection() {
         // Get starting hole from game (default to 1 if not available)

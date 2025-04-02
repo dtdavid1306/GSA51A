@@ -9,7 +9,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -28,8 +27,8 @@ fun Tooltip(
     ) {
         Surface(
             modifier = Modifier
-                .shadow(4.dp)
                 .padding(8.dp),
+            shadowElevation = 4.dp,
             shape = MaterialTheme.shapes.medium,
             color = Color(0xFF333333)
         ) {

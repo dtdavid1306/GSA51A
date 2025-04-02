@@ -30,6 +30,9 @@ import com.golfapp.gsa51.viewmodels.AppViewModelProvider
 import com.golfapp.gsa51.viewmodels.ScoringViewModel
 import kotlinx.coroutines.delay
 import com.golfapp.gsa51.ui.theme.components.GSATopAppBar
+import com.golfapp.gsa51.ui.theme.components.GSAScoreField
+import com.golfapp.gsa51.ui.theme.components.GSAPrimaryButton
+import com.golfapp.gsa51.ui.theme.components.GSASecondaryButton
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -170,7 +173,7 @@ fun ScoringScreen(
                     fontWeight = FontWeight.Medium
                 )
 
-                TextField(
+                OutlinedTextField(
                     value = viewModel.navigateToHoleInput,
                     onValueChange = { viewModel.updateNavigateToHoleInput(it) },
                     placeholder = { Text("1-18") },
@@ -187,22 +190,18 @@ fun ScoringScreen(
                     keyboardActions = KeyboardActions(
                         onDone = {
                             keyboardController?.hide()
-                            if (viewModel.isParValid()) {
-                                if (viewModel.hasUnsavedChanges) {
-                                    viewModel.autoSave {
-                                        viewModel.navigateToHole(viewModel.navigateToHoleInput)
-                                    }
-                                } else {
+                            // Remove Par validation
+                            if (viewModel.hasUnsavedChanges) {
+                                viewModel.autoSave {
                                     viewModel.navigateToHole(viewModel.navigateToHoleInput)
                                 }
                             } else {
-                                viewModel.setError("Please enter a par value (3-5)")
+                                viewModel.navigateToHole(viewModel.navigateToHoleInput)
                             }
                         }
                     ),
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        focusedIndicatorColor = GSAPurple,
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        focusedBorderColor = GSAPurple,
                         cursorColor = GSAPurple
                     )
                 )
@@ -211,21 +210,18 @@ fun ScoringScreen(
 
                 Button(
                     onClick = {
-                        if (viewModel.isParValid()) {
-                            if (viewModel.hasUnsavedChanges) {
-                                viewModel.autoSave {
-                                    viewModel.navigateToHole(viewModel.navigateToHoleInput)
-                                }
-                            } else {
+                        // Remove Par validation
+                        if (viewModel.hasUnsavedChanges) {
+                            viewModel.autoSave {
                                 viewModel.navigateToHole(viewModel.navigateToHoleInput)
                             }
                         } else {
-                            viewModel.setError("Please enter a par value (3-5)")
+                            viewModel.navigateToHole(viewModel.navigateToHoleInput)
                         }
                     },
                     modifier = Modifier
                         .height(48.dp)
-                        .width(80.dp),  // Increased from 70dp to 80dp
+                        .width(80.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = GSAPurple)
                 ) {
                     Text("GO", fontSize = 16.sp)
@@ -249,7 +245,7 @@ fun ScoringScreen(
                     fontWeight = FontWeight.Medium
                 )
 
-                TextField(
+                OutlinedTextField(
                     value = parInput,
                     onValueChange = {
                         parInput = it
@@ -271,9 +267,8 @@ fun ScoringScreen(
                     keyboardActions = KeyboardActions(
                         onNext = { handleSetPar() }
                     ),
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        focusedIndicatorColor = if (!viewModel.isParConfirmed) Color.Red else GSAPurple,
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        focusedBorderColor = if (!viewModel.isParConfirmed) Color.Red else GSAPurple,
                         cursorColor = GSAPurple
                     )
                 )
@@ -284,7 +279,7 @@ fun ScoringScreen(
                     onClick = { handleSetPar() },
                     modifier = Modifier
                         .height(48.dp)
-                        .width(80.dp),  // Increased from 70dp to 80dp
+                        .width(80.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (viewModel.isParConfirmed) Color.Green else GSAPurple
                     )
@@ -310,65 +305,55 @@ fun ScoringScreen(
                 )
             }
 
-// Player score entries - More compact
+            // Player score entries - More compact
             viewModel.players.forEachIndexed { index, player ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 2.dp), // Reduced from 4.dp
+                        .padding(vertical = 2.dp),
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 10.dp, vertical = 6.dp), // Reduced from 12.dp
+                            .padding(horizontal = 10.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
                             text = player.name,
                             style = MaterialTheme.typography.titleMedium,
-                            fontSize = 16.sp // Slightly smaller font
+                            fontSize = 16.sp
                         )
 
-                        TextField(
+                        GSAScoreField(
                             value = scoreInputs[player.id] ?: "",
                             onValueChange = {
                                 scoreInputs[player.id] = it
                                 viewModel.updateScore(player.id, it)
                             },
-                            placeholder = { Text("Score") },
                             modifier = Modifier
-                                .width(80.dp) // Slightly narrower
+                                .width(80.dp)
                                 .then(
                                     if (index == 0)
                                         Modifier.focusRequester(firstPlayerScoreFocus)
                                     else
                                         Modifier
                                 ),
-                            singleLine = true,
-                            textStyle = LocalTextStyle.current.copy(
-                                textAlign = TextAlign.Center,
-                                fontSize = 14.sp // Slightly smaller font
-                            ),
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Number,
-                                imeAction = if (player == viewModel.players.lastOrNull())
-                                    ImeAction.Done else ImeAction.Next
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onNext = { focusManager.moveFocus(FocusDirection.Down) },
-                                onDone = {
-                                    keyboardController?.hide()
-                                    // Auto-save when done is pressed on last player
-                                    viewModel.autoSave()
-                                }
-                            ),
-                            colors = TextFieldDefaults.textFieldColors(
-                                containerColor = MaterialTheme.colorScheme.surface,
-                                focusedIndicatorColor = GSAPurple,
-                                cursorColor = GSAPurple
-                            )
+                            keyboardActions = if (index < viewModel.players.size - 1) {
+                                // Not the last player, move focus down
+                                KeyboardActions(
+                                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                                )
+                            } else {
+                                // Last player, hide keyboard
+                                KeyboardActions(
+                                    onDone = {
+                                        keyboardController?.hide()
+                                        viewModel.autoSave()
+                                    }
+                                )
+                            }
                         )
                     }
                 }
@@ -377,17 +362,14 @@ fun ScoringScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Action buttons
-            Button(
+            GSAPrimaryButton(
+                text = "SAVE GAME",
                 onClick = { viewModel.saveScores() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = GSAPurple)
-            ) {
-                Text("SAVE GAME", fontSize = 16.sp)
-            }
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
 
-            Button(
+            GSAPrimaryButton(
+                text = "VIEW RESULTS",
                 onClick = {
                     if (viewModel.allHolesScored) {
                         onNavigateToResults(gameId)
@@ -395,15 +377,8 @@ fun ScoringScreen(
                         viewModel.setError("Enter score for all 18 holes")
                     }
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (viewModel.allHolesScored) Color.Green else GSAPurple
-                )
-            ) {
-                Text("VIEW RESULTS", fontSize = 16.sp)
-            }
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
 
             Row(
                 modifier = Modifier
@@ -411,27 +386,39 @@ fun ScoringScreen(
                     .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Button(
-                    onClick = { viewModel.previousHole() },
+                GSASecondaryButton(
+                    text = "PREVIOUS",
+                    onClick = {
+                        // Remove Par validation
+                        if (viewModel.hasUnsavedChanges) {
+                            viewModel.autoSave {
+                                viewModel.previousHole()
+                            }
+                        } else {
+                            viewModel.previousHole()
+                        }
+                    },
                     modifier = Modifier
                         .weight(1f)
-                        .height(48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = GSAPurple)
-                ) {
-                    Text("PREVIOUS", fontSize = 16.sp)
-                }
+                        .padding(end = 4.dp)
+                )
 
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Button(
-                    onClick = { viewModel.nextHole() },
+                GSAPrimaryButton(
+                    text = "NEXT",
+                    onClick = {
+                        // Remove Par validation
+                        if (viewModel.hasUnsavedChanges) {
+                            viewModel.autoSave {
+                                viewModel.nextHole()
+                            }
+                        } else {
+                            viewModel.nextHole()
+                        }
+                    },
                     modifier = Modifier
                         .weight(1f)
-                        .height(48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = GSAPurple)
-                ) {
-                    Text("NEXT", fontSize = 16.sp)
-                }
+                        .padding(start = 4.dp)
+                )
             }
         }
     }

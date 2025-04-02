@@ -27,6 +27,12 @@ import java.util.*
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import com.golfapp.gsa51.ui.theme.components.GSATopAppBar
+import com.golfapp.gsa51.ui.theme.components.GSATextField
+import com.golfapp.gsa51.ui.theme.components.GSACard
+import com.golfapp.gsa51.ui.theme.components.GSASectionHeader
+import com.golfapp.gsa51.ui.theme.components.GSAPrimaryButton
+import com.golfapp.gsa51.ui.theme.components.GSASecondaryButton
+import com.golfapp.gsa51.ui.theme.GSAPurple
 import com.golfapp.gsa51.ui.theme.components.Tooltip
 
 // Define the GSA purple color
@@ -72,11 +78,7 @@ fun GameDetailsScreen(
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                text = "Game Details",
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 4.dp)
-            )
+            GSASectionHeader(text = "Game Details")
 
             // Location
             Text(
@@ -84,19 +86,13 @@ fun GameDetailsScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(bottom = 2.dp)
             )
-            TextField(
+            GSATextField(
                 value = viewModel.location,
                 onValueChange = { viewModel.updateLocation(it) },
-                placeholder = { Text("Enter location") },
+                placeholder = "Enter location",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
-                singleLine = true,
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    focusedIndicatorColor = GSAPurple,
-                    cursorColor = GSAPurple
-                ),
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next
                 ),
@@ -105,13 +101,12 @@ fun GameDetailsScreen(
                 )
             )
 
-            // Date
             Text(
                 text = "Date",
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(bottom = 2.dp)
             )
-            TextField(
+            OutlinedTextField(
                 value = if (viewModel.gameDate.time > 0)
                     SimpleDateFormat(
                         "MMMM dd, yyyy",
@@ -124,10 +119,6 @@ fun GameDetailsScreen(
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
                 readOnly = true,
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    focusedIndicatorColor = GSAPurple
-                ),
                 trailingIcon = {
                     IconButton(onClick = { showDatePicker = true }) {
                         Icon(
@@ -136,7 +127,11 @@ fun GameDetailsScreen(
                             tint = GSAPurple
                         )
                     }
-                }
+                },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = GSAPurple,
+                    cursorColor = GSAPurple
+                )
             )
 
             // Bet Unit and Starting Hole in separate rows
@@ -156,7 +151,7 @@ fun GameDetailsScreen(
                         text = "Bet Unit",
                         style = MaterialTheme.typography.bodyMedium
                     )
-                    TextField(
+                    GSATextField(
                         value = if (viewModel.betUnit == 0) "" else viewModel.betUnit.toString(),
                         onValueChange = {
                             if (it.isEmpty()) {
@@ -167,13 +162,8 @@ fun GameDetailsScreen(
                                 }
                             }
                         },
-                        placeholder = { Text("$ enter bet unit") },
+                        placeholder = "$ enter bet unit",
                         singleLine = true,
-                        colors = TextFieldDefaults.textFieldColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            focusedIndicatorColor = GSAPurple,
-                            cursorColor = GSAPurple
-                        ),
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number,
                             imeAction = ImeAction.Next
@@ -210,14 +200,15 @@ fun GameDetailsScreen(
                             )
                         }
                     }
-                    // Show the tooltip if state is true
+
                     if (showStartingHoleTooltip) {
                         Tooltip(
                             text = "The starting hole determines the rotation of team pairings. Each pairing plays for 6 holes, and the sequence begins from the starting hole you select. For example, if you choose hole 14, the first pairing will play holes 14-18 and hole 1.",
                             onDismissRequest = { showStartingHoleTooltip = false }
                         )
                     }
-                    TextField(
+
+                    GSATextField(
                         value = if (viewModel.startingHole == 0) "" else viewModel.startingHole.toString(),
                         onValueChange = {
                             if (it.isEmpty()) {
@@ -230,13 +221,8 @@ fun GameDetailsScreen(
                                 }
                             }
                         },
-                        placeholder = { Text("Enter starting hole") },
+                        placeholder = "Enter starting hole",
                         singleLine = true,
-                        colors = TextFieldDefaults.textFieldColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            focusedIndicatorColor = GSAPurple,
-                            cursorColor = GSAPurple
-                        ),
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number,
                             imeAction = ImeAction.Done
@@ -272,32 +258,27 @@ fun GameDetailsScreen(
                     )
                 }
             }
-// Show the tooltip if state is true
+
             if (showPlayersTooltip) {
                 Tooltip(
                     text = "Enter the names of all four players. These names will be used throughout the game for scoring and team pairings. Each player will compete individually and as part of rotating teams.",
                     onDismissRequest = { showPlayersTooltip = false }
                 )
             }
+
             // Player 1
             Text(
                 text = "Player 1",
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(bottom = 2.dp)
             )
-            TextField(
+            GSATextField(
                 value = viewModel.player1Name,
                 onValueChange = { viewModel.updatePlayer1Name(it) },
-                placeholder = { Text("Enter player name") },
+                placeholder = "Enter player name",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 6.dp),
-                singleLine = true,
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    focusedIndicatorColor = GSAPurple,
-                    cursorColor = GSAPurple
-                ),
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next
                 ),
@@ -312,19 +293,13 @@ fun GameDetailsScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(bottom = 2.dp)
             )
-            TextField(
+            GSATextField(
                 value = viewModel.player2Name,
                 onValueChange = { viewModel.updatePlayer2Name(it) },
-                placeholder = { Text("Enter player name") },
+                placeholder = "Enter player name",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 6.dp),
-                singleLine = true,
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    focusedIndicatorColor = GSAPurple,
-                    cursorColor = GSAPurple
-                ),
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next
                 ),
@@ -339,19 +314,13 @@ fun GameDetailsScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(bottom = 2.dp)
             )
-            TextField(
+            GSATextField(
                 value = viewModel.player3Name,
                 onValueChange = { viewModel.updatePlayer3Name(it) },
-                placeholder = { Text("Enter player name") },
+                placeholder = "Enter player name",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 6.dp),
-                singleLine = true,
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    focusedIndicatorColor = GSAPurple,
-                    cursorColor = GSAPurple
-                ),
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next
                 ),
@@ -366,19 +335,13 @@ fun GameDetailsScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(bottom = 2.dp)
             )
-            TextField(
+            GSATextField(
                 value = viewModel.player4Name,
                 onValueChange = { viewModel.updatePlayer4Name(it) },
-                placeholder = { Text("Enter player name") },
+                placeholder = "Enter player name",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 6.dp),
-                singleLine = true,
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    focusedIndicatorColor = GSAPurple,
-                    cursorColor = GSAPurple
-                ),
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Done
                 ),
@@ -397,19 +360,14 @@ fun GameDetailsScreen(
                     .padding(vertical = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Button(
+                GSASecondaryButton(
+                    text = "LOAD GAME",
                     onClick = { onNavigateToSavedGames() },
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = GSAPurple
-                    )
-                ) {
-                    Text("LOAD GAME", style = MaterialTheme.typography.labelLarge)
-                }
+                    modifier = Modifier.weight(1f)
+                )
 
-                // In GameDetailsScreen.kt, find the Button section for "START GAME" and update it:
-
-                Button(
+                GSAPrimaryButton(
+                    text = "START GAME",
                     onClick = {
                         scope.launch {
                             // Only proceed if validation passes
@@ -432,75 +390,70 @@ fun GameDetailsScreen(
                             viewModel.player2Name.isNotBlank() &&
                             viewModel.player3Name.isNotBlank() &&
                             viewModel.player4Name.isNotBlank() &&
-                            viewModel.location.isNotBlank(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = GSAPurple
-                    )
-                ) {
-                    Text("START GAME", style = MaterialTheme.typography.labelLarge)
-                }
+                            viewModel.location.isNotBlank()
+                )
+            }
 
-                // Date picker dialog
-                if (showDatePicker) {
-                    val datePickerState = rememberDatePickerState(
-                        initialSelectedDateMillis = viewModel.gameDate.time
-                    )
+            // Date picker dialog
+            if (showDatePicker) {
+                val datePickerState = rememberDatePickerState(
+                    initialSelectedDateMillis = viewModel.gameDate.time
+                )
 
-                    DatePickerDialog(
-                        onDismissRequest = { showDatePicker = false },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    datePickerState.selectedDateMillis?.let { millis ->
-                                        viewModel.updateGameDate(Date(millis))
-                                    }
-                                    showDatePicker = false
+                DatePickerDialog(
+                    onDismissRequest = { showDatePicker = false },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                datePickerState.selectedDateMillis?.let { millis ->
+                                    viewModel.updateGameDate(Date(millis))
                                 }
-                            ) {
-                                Text("OK")
+                                showDatePicker = false
                             }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { showDatePicker = false }) {
-                                Text("Cancel")
-                            }
+                        ) {
+                            Text("OK")
                         }
-                    ) {
-                        DatePicker(state = datePickerState)
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDatePicker = false }) {
+                            Text("Cancel")
+                        }
                     }
+                ) {
+                    DatePicker(state = datePickerState)
                 }
+            }
 
-                // Exit confirmation dialog
-                if (showExitDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showExitDialog = false },
-                        title = { Text("Exit Application") },
-                        text = { Text("Do you want to exit GSA?") },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    showExitDialog = false
-                                    onExitApp() // Call the exit function
-                                },
-                                colors = ButtonDefaults.textButtonColors(
-                                    contentColor = GSAPurple
-                                )
-                            ) {
-                                Text("YES")
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(
-                                onClick = { showExitDialog = false },
-                                colors = ButtonDefaults.textButtonColors(
-                                    contentColor = GSAPurple
-                                )
-                            ) {
-                                Text("NO")
-                            }
+            // Exit confirmation dialog
+            if (showExitDialog) {
+                AlertDialog(
+                    onDismissRequest = { showExitDialog = false },
+                    title = { Text("Exit Application") },
+                    text = { Text("Do you want to exit GSA?") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                showExitDialog = false
+                                onExitApp() // Call the exit function
+                            },
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = GSAPurple
+                            )
+                        ) {
+                            Text("YES")
                         }
-                    )
-                }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { showExitDialog = false },
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = GSAPurple
+                            )
+                        ) {
+                            Text("NO")
+                        }
+                    }
+                )
             }
         }
     }
