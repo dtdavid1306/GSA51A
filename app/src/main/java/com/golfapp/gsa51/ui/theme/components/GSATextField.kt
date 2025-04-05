@@ -15,6 +15,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.golfapp.gsa51.ui.theme.GSAPurple
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.derivedStateOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,7 +58,7 @@ fun GSATextField(
     )
 }
 
-// Numeric score field specific for the scoring screen
+// Modify the GSAScoreField component
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GSAScoreField(
@@ -61,10 +67,21 @@ fun GSAScoreField(
     modifier: Modifier = Modifier,
     keyboardActions: KeyboardActions = KeyboardActions.Default
 ) {
+    // Determine if we have a valid score (non-empty)
+    val hasValidInput = remember(value) { derivedStateOf { value.isNotEmpty() } }
+
+    // Animate background color based on input validity
+    val backgroundColor by animateColorAsState(
+        targetValue = if (hasValidInput.value) Color(0xFFE8F5E9) else Color.Transparent,
+        label = "scoreFieldBackground"
+    )
+
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier,
+        modifier = modifier
+            .clip(MaterialTheme.shapes.small)
+            .background(backgroundColor),
         placeholder = { Text(text = "#", color = Color.Gray) },
         singleLine = true,
         keyboardOptions = KeyboardOptions(

@@ -2,6 +2,7 @@ package com.golfapp.gsa51.ui.navigation
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,6 +25,14 @@ import android.content.Intent
 import androidx.compose.ui.platform.LocalContext
 import com.golfapp.gsa51.ui.theme.screens.SavedGamesScreen
 import com.golfapp.gsa51.ui.theme.screens.FinalScoreDetailsScreen
+
+// Add these imports for animations
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 
 // Define navigation routes
 sealed class Screen(val route: String) {
@@ -52,7 +61,12 @@ fun AppNavigation(navController: NavHostController) {
         navController = navController,
         startDestination = Screen.Splash.route
     ) {
-        composable(Screen.Splash.route) {
+        composable(
+            route = Screen.Splash.route,
+            exitTransition = {
+                fadeOut(animationSpec = tween(300))
+            }
+        ) {
             SplashScreen(
                 onSplashFinished = {
                     navController.navigate(Screen.GameDetails.route) {
@@ -62,7 +76,33 @@ fun AppNavigation(navController: NavHostController) {
             )
         }
 
-        composable(Screen.GameDetails.route) {
+        composable(
+            route = Screen.GameDetails.route,
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { 1000 },
+                    animationSpec = tween(300)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -1000 },
+                    animationSpec = tween(300)
+                ) + fadeOut(animationSpec = tween(300))
+            },
+            popEnterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { -1000 },
+                    animationSpec = tween(300)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { 1000 },
+                    animationSpec = tween(300)
+                ) + fadeOut(animationSpec = tween(300))
+            }
+        ) {
             val context = LocalContext.current
             GameDetailsScreen(
                 onNavigateToIndividualSettings = { gameId ->
@@ -85,7 +125,31 @@ fun AppNavigation(navController: NavHostController) {
 
         composable(
             route = Screen.IndividualGameSettings.route,
-            arguments = listOf(navArgument("gameId") { type = NavType.LongType })
+            arguments = listOf(navArgument("gameId") { type = NavType.LongType }),
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { 1000 },
+                    animationSpec = tween(300)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -1000 },
+                    animationSpec = tween(300)
+                ) + fadeOut(animationSpec = tween(300))
+            },
+            popEnterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { -1000 },
+                    animationSpec = tween(300)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { 1000 },
+                    animationSpec = tween(300)
+                ) + fadeOut(animationSpec = tween(300))
+            }
         ) { backStackEntry ->
             val gameId = backStackEntry.arguments?.getLong("gameId") ?: -1L
 
@@ -103,7 +167,33 @@ fun AppNavigation(navController: NavHostController) {
             )
         }
 
-        composable(Screen.SavedGames.route) {
+        composable(
+            route = Screen.SavedGames.route,
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { 1000 },
+                    animationSpec = tween(300)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -1000 },
+                    animationSpec = tween(300)
+                ) + fadeOut(animationSpec = tween(300))
+            },
+            popEnterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { -1000 },
+                    animationSpec = tween(300)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { 1000 },
+                    animationSpec = tween(300)
+                ) + fadeOut(animationSpec = tween(300))
+            }
+        ) {
             SavedGamesScreen(
                 onNavigateBack = {
                     navController.popBackStack()
@@ -126,7 +216,31 @@ fun AppNavigation(navController: NavHostController) {
 
         composable(
             route = Screen.TeamPairings.route,
-            arguments = listOf(navArgument("gameId") { type = NavType.LongType })
+            arguments = listOf(navArgument("gameId") { type = NavType.LongType }),
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { 1000 },
+                    animationSpec = tween(300)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -1000 },
+                    animationSpec = tween(300)
+                ) + fadeOut(animationSpec = tween(300))
+            },
+            popEnterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { -1000 },
+                    animationSpec = tween(300)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { 1000 },
+                    animationSpec = tween(300)
+                ) + fadeOut(animationSpec = tween(300))
+            }
         ) { backStackEntry ->
             val gameId = backStackEntry.arguments?.getLong("gameId") ?: -1L
 
@@ -146,7 +260,31 @@ fun AppNavigation(navController: NavHostController) {
 
         composable(
             route = Screen.Results.route,
-            arguments = listOf(navArgument("gameId") { type = NavType.LongType })
+            arguments = listOf(navArgument("gameId") { type = NavType.LongType }),
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { 1000 },
+                    animationSpec = tween(300)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -1000 },
+                    animationSpec = tween(300)
+                ) + fadeOut(animationSpec = tween(300))
+            },
+            popEnterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { -1000 },
+                    animationSpec = tween(300)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { 1000 },
+                    animationSpec = tween(300)
+                ) + fadeOut(animationSpec = tween(300))
+            }
         ) { backStackEntry ->
             val gameId = backStackEntry.arguments?.getLong("gameId") ?: -1L
 
@@ -171,7 +309,31 @@ fun AppNavigation(navController: NavHostController) {
 
         composable(
             route = Screen.Scoring.route,
-            arguments = listOf(navArgument("gameId") { type = NavType.LongType })
+            arguments = listOf(navArgument("gameId") { type = NavType.LongType }),
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { 1000 },
+                    animationSpec = tween(300)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -1000 },
+                    animationSpec = tween(300)
+                ) + fadeOut(animationSpec = tween(300))
+            },
+            popEnterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { -1000 },
+                    animationSpec = tween(300)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { 1000 },
+                    animationSpec = tween(300)
+                ) + fadeOut(animationSpec = tween(300))
+            }
         ) { backStackEntry ->
             val gameId = backStackEntry.arguments?.getLong("gameId") ?: -1L
 
@@ -191,7 +353,19 @@ fun AppNavigation(navController: NavHostController) {
 
         composable(
             route = Screen.FinalScoreDetails.route,
-            arguments = listOf(navArgument("gameId") { type = NavType.LongType })
+            arguments = listOf(navArgument("gameId") { type = NavType.LongType }),
+            enterTransition = {
+                fadeIn(animationSpec = tween(300))
+            },
+            exitTransition = {
+                fadeOut(animationSpec = tween(300))
+            },
+            popEnterTransition = {
+                fadeIn(animationSpec = tween(300))
+            },
+            popExitTransition = {
+                fadeOut(animationSpec = tween(300))
+            }
         ) { backStackEntry ->
             val gameId = backStackEntry.arguments?.getLong("gameId") ?: -1L
 
@@ -204,7 +378,21 @@ fun AppNavigation(navController: NavHostController) {
             )
         }
 
-        composable(Screen.GameRules.route) {
+        composable(
+            route = Screen.GameRules.route,
+            enterTransition = {
+                fadeIn(animationSpec = tween(300))
+            },
+            exitTransition = {
+                fadeOut(animationSpec = tween(300))
+            },
+            popEnterTransition = {
+                fadeIn(animationSpec = tween(300))
+            },
+            popExitTransition = {
+                fadeOut(animationSpec = tween(300))
+            }
+        ) {
             GameRulesScreen(
                 onNavigateBack = {
                     navController.popBackStack()

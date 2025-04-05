@@ -1,10 +1,9 @@
 package com.golfapp.gsa51.ui.theme.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,7 +15,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -24,15 +22,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.golfapp.gsa51.R
 import com.golfapp.gsa51.ui.theme.GSAPurple
 import com.golfapp.gsa51.viewmodels.AppViewModelProvider
 import com.golfapp.gsa51.viewmodels.ScoringViewModel
 import kotlinx.coroutines.delay
 import com.golfapp.gsa51.ui.theme.components.GSATopAppBar
 import com.golfapp.gsa51.ui.theme.components.GSAScoreField
-import com.golfapp.gsa51.ui.theme.components.GSAPrimaryButton
-import com.golfapp.gsa51.ui.theme.components.GSASecondaryButton
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +49,6 @@ fun ScoringScreen(
         viewModel.initialize(gameId)
     }
 
-    val scrollState = rememberScrollState()
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -90,31 +85,22 @@ fun ScoringScreen(
     LaunchedEffect(viewModel.currentHole, viewModel.isParConfirmed) {
         delay(300) // Short delay to ensure UI is ready
         if (viewModel.isParConfirmed) {
-            // If par is already confirmed, focus on first player
             try {
                 firstPlayerScoreFocus.requestFocus()
-            } catch (e: Exception) {
-                // Handle any focus errors
-            }
+            } catch (e: Exception) { }
         } else {
-            // If par needs to be set, focus on par field
             try {
                 parFieldFocus.requestFocus()
-            } catch (e: Exception) {
-                // Handle any focus errors
-            }
+            } catch (e: Exception) { }
         }
     }
 
     // Function to handle setting par
     val handleSetPar = {
         if (viewModel.confirmPar()) {
-            // Focus on first player's score field
             try {
                 firstPlayerScoreFocus.requestFocus()
-            } catch (e: Exception) {
-                // Handle any focus errors
-            }
+            } catch (e: Exception) { }
         } else {
             viewModel.setError("Please enter a valid par value (3-5)")
         }
@@ -127,7 +113,6 @@ fun ScoringScreen(
                 showBackButton = true,
                 onBackClick = {
                     if (viewModel.hasUnsavedChanges) {
-                        // Auto-save before navigating back
                         viewModel.autoSave {
                             onNavigateBack()
                         }
@@ -143,45 +128,50 @@ fun ScoringScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-                .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp) // Reduced spacing
         ) {
-            // Current Hole Display - Larger and centered
+            // Current Hole Display
             Text(
                 text = "Hole ${viewModel.currentHole}",
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(vertical = 8.dp),
                 fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(vertical = 2.dp)
             )
 
-            // Go to hole row - Centered
+            // Go to hole row - with wider button
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "Go to hole:",
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(end = 12.dp),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontSize = 16.sp,
+                    modifier = Modifier.width(100.dp)
                 )
 
                 OutlinedTextField(
                     value = viewModel.navigateToHoleInput,
                     onValueChange = { viewModel.updateNavigateToHoleInput(it) },
-                    placeholder = { Text("1-18") },
-                    modifier = Modifier.width(150.dp),
+                    placeholder = {
+                        Text(
+                            "1-18",
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    },
+                    modifier = Modifier
+                        .width(190.dp) // Slightly narrower text field
+                        .height(56.dp),
                     singleLine = true,
                     textStyle = LocalTextStyle.current.copy(
                         textAlign = TextAlign.Center,
-                        fontSize = 18.sp
+                        fontSize = 16.sp
                     ),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
@@ -190,59 +180,52 @@ fun ScoringScreen(
                     keyboardActions = KeyboardActions(
                         onDone = {
                             keyboardController?.hide()
-                            // Remove Par validation
-                            if (viewModel.hasUnsavedChanges) {
-                                viewModel.autoSave {
-                                    viewModel.navigateToHole(viewModel.navigateToHoleInput)
-                                }
-                            } else {
-                                viewModel.navigateToHole(viewModel.navigateToHoleInput)
-                            }
+                            viewModel.navigateToHole(viewModel.navigateToHoleInput)
                         }
                     ),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
                         focusedBorderColor = GSAPurple,
                         cursorColor = GSAPurple
-                    )
+                    ),
+                    shape = RoundedCornerShape(8.dp)
                 )
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(8.dp))
 
                 Button(
                     onClick = {
-                        // Remove Par validation
-                        if (viewModel.hasUnsavedChanges) {
-                            viewModel.autoSave {
-                                viewModel.navigateToHole(viewModel.navigateToHoleInput)
-                            }
-                        } else {
-                            viewModel.navigateToHole(viewModel.navigateToHoleInput)
-                        }
+                        keyboardController?.hide()
+                        viewModel.navigateToHole(viewModel.navigateToHoleInput)
                     },
                     modifier = Modifier
-                        .height(48.dp)
-                        .width(80.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = GSAPurple)
+                        .height(56.dp)
+                        .width(45.dp), // Makes the button just wide enough for "GO"
+                    colors = ButtonDefaults.buttonColors(containerColor = GSAPurple),
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp) // Reduce padding
                 ) {
-                    Text("GO", fontSize = 16.sp)
+                    Text(
+                        "GO",
+                        fontSize = 14.sp, // Slightly smaller text
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        letterSpacing = (-0.5).sp // Tighter letter spacing
+                    )
                 }
             }
 
-            // Par row - Centered
+// Par row - with wider button
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "Par:",
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = if (!viewModel.isParConfirmed) Color.Red else Color.Black,
-                    modifier = Modifier.padding(end = 12.dp),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium
+                    fontSize = 16.sp,
+                    modifier = Modifier.width(100.dp)
                 )
 
                 OutlinedTextField(
@@ -251,46 +234,61 @@ fun ScoringScreen(
                         parInput = it
                         viewModel.updatePar(it)
                     },
-                    placeholder = { Text("3-5") },
+                    placeholder = {
+                        Text(
+                            "3-5",
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    },
                     modifier = Modifier
-                        .width(150.dp)
+                        .width(190.dp) // Slightly narrower text field
+                        .height(56.dp)
                         .focusRequester(parFieldFocus),
                     singleLine = true,
                     textStyle = LocalTextStyle.current.copy(
                         textAlign = TextAlign.Center,
-                        fontSize = 18.sp
+                        fontSize = 16.sp
                     ),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Next
+                        imeAction = ImeAction.Done
                     ),
                     keyboardActions = KeyboardActions(
-                        onNext = { handleSetPar() }
+                        onDone = { handleSetPar() }
                     ),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
                         focusedBorderColor = if (!viewModel.isParConfirmed) Color.Red else GSAPurple,
                         cursorColor = GSAPurple
-                    )
+                    ),
+                    shape = RoundedCornerShape(8.dp)
                 )
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(8.dp))
 
                 Button(
                     onClick = { handleSetPar() },
                     modifier = Modifier
-                        .height(48.dp)
-                        .width(80.dp),
+                        .height(56.dp)
+                        .width(45.dp), // Makes the button just wide enough for "SET"
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (viewModel.isParConfirmed) Color.Green else GSAPurple
-                    )
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp) // Reduce padding
                 ) {
-                    Text("SET", fontSize = 16.sp)
+                    Text(
+                        "SET",
+                        fontSize = 14.sp, // Slightly smaller text
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        letterSpacing = (-0.5).sp // Tighter letter spacing
+                    )
                 }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Team Pairings for current hole - Enlarged
+            // Team Pairings info
             val (team1Player1, team1Player2) = viewModel.getTeamMemberNames(1)
             val (team2Player1, team2Player2) = viewModel.getTeamMemberNames(2)
 
@@ -298,25 +296,28 @@ fun ScoringScreen(
                 Text(
                     text = "Team 1: $team1Player1 & $team1Player2  vs  Team 2: $team2Player1 & $team2Player2",
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    fontSize = 16.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    textAlign = TextAlign.Center
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
-            // Player score entries - More compact
+            // Player score entries - Compact
             viewModel.players.forEachIndexed { index, player ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 2.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFEEEEF6) // Light lavender background
+                    ),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
@@ -333,7 +334,7 @@ fun ScoringScreen(
                                 viewModel.updateScore(player.id, it)
                             },
                             modifier = Modifier
-                                .width(80.dp)
+                                .width(70.dp)
                                 .then(
                                     if (index == 0)
                                         Modifier.focusRequester(firstPlayerScoreFocus)
@@ -341,12 +342,10 @@ fun ScoringScreen(
                                         Modifier
                                 ),
                             keyboardActions = if (index < viewModel.players.size - 1) {
-                                // Not the last player, move focus down
                                 KeyboardActions(
                                     onNext = { focusManager.moveFocus(FocusDirection.Down) }
                                 )
                             } else {
-                                // Last player, hide keyboard
                                 KeyboardActions(
                                     onDone = {
                                         keyboardController?.hide()
@@ -359,17 +358,10 @@ fun ScoringScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.weight(1f, fill = false))
 
-            // Action buttons
-            GSAPrimaryButton(
-                text = "SAVE GAME",
-                onClick = { viewModel.saveScores() },
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
-
-            GSAPrimaryButton(
-                text = "VIEW RESULTS",
+            // VIEW RESULTS button (full width)
+            Button(
                 onClick = {
                     if (viewModel.allHolesScored) {
                         onNavigateToResults(gameId)
@@ -377,19 +369,31 @@ fun ScoringScreen(
                         viewModel.setError("Enter score for all 18 holes")
                     }
                 },
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .padding(vertical = 4.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = GSAPurple),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    text = "VIEW RESULTS",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
 
+            // PREVIOUS, SAVE GAME, NEXT buttons in a single row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                GSASecondaryButton(
-                    text = "PREVIOUS",
+                // PREVIOUS button
+                OutlinedButton(
                     onClick = {
-                        // Remove Par validation
                         if (viewModel.hasUnsavedChanges) {
                             viewModel.autoSave {
                                 viewModel.previousHole()
@@ -399,14 +403,42 @@ fun ScoringScreen(
                         }
                     },
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 4.dp)
-                )
+                        .weight(0.33f)
+                        .height(48.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = GSAPurple
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, GSAPurple)
+                ) {
+                    Text(
+                        text = "PREVIOUS",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
 
-                GSAPrimaryButton(
-                    text = "NEXT",
+                // SAVE GAME button (in the middle)
+                Button(
+                    onClick = { viewModel.saveScores() },
+                    modifier = Modifier
+                        .weight(0.34f)
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = GSAPurple),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "SAVE GAME",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                // NEXT button
+                Button(
                     onClick = {
-                        // Remove Par validation
                         if (viewModel.hasUnsavedChanges) {
                             viewModel.autoSave {
                                 viewModel.nextHole()
@@ -416,10 +448,23 @@ fun ScoringScreen(
                         }
                     },
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 4.dp)
-                )
+                        .weight(0.33f)
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = GSAPurple
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "NEXT",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
+
+            Spacer(modifier = Modifier.height(4.dp))
         }
     }
 

@@ -12,6 +12,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.golfapp.gsa51.ui.theme.GSAPurple
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.draw.scale
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 
 @Composable
 fun GSAPrimaryButton(
@@ -20,12 +26,23 @@ fun GSAPrimaryButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
+    // Add interaction source to detect press state
+    val interactionSource = remember { MutableInteractionSource() }
+    // Get press state from interaction source
+    val isPressed by interactionSource.collectIsPressedAsState()
+    // Animate scale based on press state
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.95f else 1f,
+        label = "buttonScale"
+    )
     Button(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(56.dp),
+            .height(56.dp)
+            .scale(scale), // Apply the scale animation
         enabled = enabled,
+        interactionSource = interactionSource, // Pass the interaction source
         colors = ButtonDefaults.buttonColors(
             containerColor = GSAPurple,
             disabledContainerColor = GSAPurple.copy(alpha = 0.5f)
@@ -38,6 +55,7 @@ fun GSAPrimaryButton(
     }
 }
 
+// Update GSASecondaryButton to include animation
 @Composable
 fun GSASecondaryButton(
     text: String,
@@ -45,12 +63,24 @@ fun GSASecondaryButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
+    // Add interaction source to detect press state
+    val interactionSource = remember { MutableInteractionSource() }
+    // Get press state from interaction source
+    val isPressed by interactionSource.collectIsPressedAsState()
+    // Animate scale based on press state
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.95f else 1f,
+        label = "buttonScale"
+    )
+
     OutlinedButton(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(56.dp),
+            .height(56.dp)
+            .scale(scale), // Apply the scale animation
         enabled = enabled,
+        interactionSource = interactionSource, // Pass the interaction source
         colors = ButtonDefaults.outlinedButtonColors(
             contentColor = GSAPurple
         )
