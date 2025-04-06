@@ -102,7 +102,7 @@ fun ScoringScreen(
                 firstPlayerScoreFocus.requestFocus()
             } catch (e: Exception) { }
         } else {
-            viewModel.setError("Please enter a valid par value (3-5)")
+            viewModel.setGuidance("Please enter a par value between 3 and 5")
         }
     }
 
@@ -215,7 +215,7 @@ fun ScoringScreen(
                 }
             }
 
-// Par row - with wider button
+            // Par row - with wider button
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -288,6 +288,7 @@ fun ScoringScreen(
                     )
                 }
             }
+
             // Team Pairings info
             val (team1Player1, team1Player2) = viewModel.getTeamMemberNames(1)
             val (team2Player1, team2Player2) = viewModel.getTeamMemberNames(2)
@@ -366,14 +367,16 @@ fun ScoringScreen(
                     if (viewModel.allHolesScored) {
                         onNavigateToResults(gameId)
                     } else {
-                        viewModel.setError("Enter score for all 18 holes")
+                        viewModel.setGuidance("Please enter scores for all 18 holes")
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)
                     .padding(vertical = 4.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = GSAPurple),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (viewModel.allHolesScored) Color.Green else GSAPurple
+                ),
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
@@ -478,14 +481,17 @@ fun ScoringScreen(
         }
     }
 
-    // Error message dialog
-    if (viewModel.errorMessage != null) {
+    // Guidance message dialog
+    if (viewModel.guidanceMessage != null) {
         AlertDialog(
-            onDismissRequest = { viewModel.clearError() },
-            title = { Text("Error") },
-            text = { Text(viewModel.errorMessage ?: "") },
+            onDismissRequest = { viewModel.clearGuidance() },
+            title = { Text("Attention Needed") },
+            text = { Text(viewModel.guidanceMessage ?: "") },
             confirmButton = {
-                Button(onClick = { viewModel.clearError() }) {
+                Button(
+                    onClick = { viewModel.clearGuidance() },
+                    colors = ButtonDefaults.buttonColors(containerColor = GSAPurple)
+                ) {
                     Text("OK")
                 }
             }

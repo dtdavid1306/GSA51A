@@ -1,10 +1,8 @@
 package com.golfapp.gsa51.ui.theme.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,8 +26,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import com.golfapp.gsa51.ui.theme.components.GSATopAppBar
 import com.golfapp.gsa51.ui.theme.components.GSATextField
-import com.golfapp.gsa51.ui.theme.components.GSACard
-import com.golfapp.gsa51.ui.theme.components.GSASectionHeader
 import com.golfapp.gsa51.ui.theme.components.GSAPrimaryButton
 import com.golfapp.gsa51.ui.theme.components.GSASecondaryButton
 import com.golfapp.gsa51.ui.theme.GSAPurple
@@ -47,7 +43,6 @@ fun GameDetailsScreen(
     onExitApp: () -> Unit = {},
     viewModel: GameDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val scrollState = rememberScrollState()
     var showDatePicker by remember { mutableStateOf(false) }
     var showExitDialog by remember { mutableStateOf(false) }
     var showStartingHoleTooltip by remember { mutableStateOf(false) }
@@ -61,9 +56,8 @@ fun GameDetailsScreen(
         topBar = {
             GSATopAppBar(
                 title = "Game Details",
-                showBackButton = true,  // Show back button
+                showBackButton = true,
                 onBackClick = {
-                    // Show confirmation dialog before exiting
                     showExitDialog = true
                 },
                 onInfoClick = onNavigateToGameRules
@@ -74,82 +68,90 @@ fun GameDetailsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(horizontal = 12.dp, vertical = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp) // Reduced spacing
         ) {
-            GSASectionHeader(text = "Game Details")
-
-            // Location
-            Text(
-                text = "Location",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = 2.dp)
-            )
-            GSATextField(
-                value = viewModel.location,
-                onValueChange = { viewModel.updateLocation(it) },
-                placeholder = "Enter location",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next
-                ),
-                keyboardActions = KeyboardActions(
-                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                )
-            )
-
-            Text(
-                text = "Date",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = 2.dp)
-            )
-            OutlinedTextField(
-                value = if (viewModel.gameDate.time > 0)
-                    SimpleDateFormat(
-                        "MMMM dd, yyyy",
-                        Locale.getDefault()
-                    ).format(viewModel.gameDate)
-                else "",
-                onValueChange = { },
-                placeholder = { Text("Select date") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                readOnly = true,
-                trailingIcon = {
-                    IconButton(onClick = { showDatePicker = true }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_calendar),
-                            contentDescription = "Select Date",
-                            tint = GSAPurple
+            // Location and Date in the same row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Location
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Location",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(bottom = 1.dp)
+                    )
+                    GSATextField(
+                        value = viewModel.location,
+                        onValueChange = { viewModel.updateLocation(it) },
+                        placeholder = "Enter location",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp), // Increased height
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Next
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onNext = { focusManager.moveFocus(FocusDirection.Right) }
                         )
-                    }
-                },
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = GSAPurple,
-                    cursorColor = GSAPurple
-                )
-            )
+                    )
+                }
 
-            // Bet Unit and Starting Hole in separate rows
+                // Date
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Date",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(bottom = 1.dp)
+                    )
+                    OutlinedTextField(
+                        value = if (viewModel.gameDate.time > 0)
+                            SimpleDateFormat(
+                                "MMM d, yyyy",
+                                Locale.getDefault()
+                            ).format(viewModel.gameDate)
+                        else "",
+                        onValueChange = { },
+                        placeholder = { Text("Select date") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp), // Increased height
+                        readOnly = true,
+                        trailingIcon = {
+                            IconButton(onClick = { showDatePicker = true }, modifier = Modifier.size(36.dp)) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_calendar),
+                                    contentDescription = "Select Date",
+                                    tint = GSAPurple
+                                )
+                            }
+                        },
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            focusedBorderColor = GSAPurple,
+                            cursorColor = GSAPurple
+                        ),
+                        singleLine = true
+                    )
+                }
+            }
+
+            // Bet Unit and Starting Hole in separate row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                    .padding(bottom = 2.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Bet Unit - SIMPLIFIED
+                // Bet Unit
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                    verticalArrangement = Arrangement.spacedBy(1.dp)
                 ) {
                     Text(
                         text = "Bet Unit",
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.titleMedium
                     )
                     GSATextField(
                         value = if (viewModel.betUnit == 0) "" else viewModel.betUnit.toString(),
@@ -164,6 +166,9 @@ fun GameDetailsScreen(
                         },
                         placeholder = "$ enter bet unit",
                         singleLine = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp), // Increased height
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number,
                             imeAction = ImeAction.Next
@@ -174,19 +179,17 @@ fun GameDetailsScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
-
-                // Starting Hole - SIMPLIFIED
+                // Starting Hole
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                    verticalArrangement = Arrangement.spacedBy(1.dp)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = "Starting Hole",
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.titleMedium
                         )
                         IconButton(
                             onClick = { showStartingHoleTooltip = true },
@@ -195,17 +198,10 @@ fun GameDetailsScreen(
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_info),
                                 contentDescription = "Starting Hole Info",
-                                modifier = Modifier.size(14.dp),
+                                modifier = Modifier.size(12.dp),
                                 tint = GSAPurple
                             )
                         }
-                    }
-
-                    if (showStartingHoleTooltip) {
-                        Tooltip(
-                            text = "The starting hole determines the rotation of team pairings. Each pairing plays for 6 holes, and the sequence begins from the starting hole you select. For example, if you choose hole 14, the first pairing will play holes 14-18 and hole 1.",
-                            onDismissRequest = { showStartingHoleTooltip = false }
-                        )
                     }
 
                     GSATextField(
@@ -223,6 +219,9 @@ fun GameDetailsScreen(
                         },
                         placeholder = "Enter starting hole",
                         singleLine = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp), // Increased height
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number,
                             imeAction = ImeAction.Done
@@ -237,10 +236,10 @@ fun GameDetailsScreen(
                 }
             }
 
-            // Players Section
+            // Players Section with more compact design
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(top = 4.dp, bottom = 2.dp)
+                modifier = Modifier.padding(top = 2.dp, bottom = 1.dp)
             ) {
                 Text(
                     text = "Players",
@@ -253,32 +252,25 @@ fun GameDetailsScreen(
                     Icon(
                         painter = painterResource(id = R.drawable.ic_info),
                         contentDescription = "Player Info",
-                        modifier = Modifier.size(14.dp),
+                        modifier = Modifier.size(12.dp),
                         tint = GSAPurple
                     )
                 }
             }
 
-            if (showPlayersTooltip) {
-                Tooltip(
-                    text = "Enter the names of all four players. These names will be used throughout the game for scoring and team pairings. Each player will compete individually and as part of rotating teams.",
-                    onDismissRequest = { showPlayersTooltip = false }
-                )
-            }
-
-            // Player 1
+            // Player 1 & 2 in the same row
             Text(
                 text = "Player 1",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = 2.dp)
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 1.dp)
             )
             GSATextField(
                 value = viewModel.player1Name,
                 onValueChange = { viewModel.updatePlayer1Name(it) },
-                placeholder = "Enter player name",
+                placeholder = "Enter name",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 6.dp),
+                    .height(56.dp), // Increased height
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next
                 ),
@@ -290,16 +282,16 @@ fun GameDetailsScreen(
             // Player 2
             Text(
                 text = "Player 2",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = 2.dp)
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 1.dp)
             )
             GSATextField(
                 value = viewModel.player2Name,
                 onValueChange = { viewModel.updatePlayer2Name(it) },
-                placeholder = "Enter player name",
+                placeholder = "Enter name",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 6.dp),
+                    .height(56.dp), // Increased height
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next
                 ),
@@ -311,16 +303,16 @@ fun GameDetailsScreen(
             // Player 3
             Text(
                 text = "Player 3",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = 2.dp)
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 1.dp)
             )
             GSATextField(
                 value = viewModel.player3Name,
                 onValueChange = { viewModel.updatePlayer3Name(it) },
-                placeholder = "Enter player name",
+                placeholder = "Enter name",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 6.dp),
+                    .height(56.dp), // Increased height
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next
                 ),
@@ -332,16 +324,16 @@ fun GameDetailsScreen(
             // Player 4
             Text(
                 text = "Player 4",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = 2.dp)
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 1.dp)
             )
             GSATextField(
                 value = viewModel.player4Name,
                 onValueChange = { viewModel.updatePlayer4Name(it) },
-                placeholder = "Enter player name",
+                placeholder = "Enter name",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 6.dp),
+                    .height(56.dp), // Increased height
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Done
                 ),
@@ -353,12 +345,14 @@ fun GameDetailsScreen(
                 )
             )
 
-            // Buttons
+            Spacer(modifier = Modifier.weight(1f, fill = true))
+
+            // Buttons in a row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 GSASecondaryButton(
                     text = "LOAD GAME",
@@ -370,17 +364,13 @@ fun GameDetailsScreen(
                     text = "START GAME",
                     onClick = {
                         scope.launch {
-                            // Only proceed if validation passes
                             if (viewModel.player1Name.isNotBlank() &&
                                 viewModel.player2Name.isNotBlank() &&
                                 viewModel.player3Name.isNotBlank() &&
                                 viewModel.player4Name.isNotBlank() &&
                                 viewModel.location.isNotBlank()) {
 
-                                // Create the game and get the game ID
                                 val gameId = viewModel.createGame()
-
-                                // Navigate to Individual Game Settings with the game ID
                                 onNavigateToIndividualSettings(gameId)
                             }
                         }
@@ -434,7 +424,7 @@ fun GameDetailsScreen(
                         TextButton(
                             onClick = {
                                 showExitDialog = false
-                                onExitApp() // Call the exit function
+                                onExitApp()
                             },
                             colors = ButtonDefaults.textButtonColors(
                                 contentColor = GSAPurple
@@ -453,6 +443,20 @@ fun GameDetailsScreen(
                             Text("NO")
                         }
                     }
+                )
+            }
+
+            if (showStartingHoleTooltip) {
+                Tooltip(
+                    text = "The starting hole determines the rotation of team pairings. Each pairing plays for 6 holes.",
+                    onDismissRequest = { showStartingHoleTooltip = false }
+                )
+            }
+
+            if (showPlayersTooltip) {
+                Tooltip(
+                    text = "Enter the names of all four players for this golf game.",
+                    onDismissRequest = { showPlayersTooltip = false }
                 )
             }
         }

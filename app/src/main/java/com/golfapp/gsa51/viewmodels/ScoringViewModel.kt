@@ -55,7 +55,7 @@ class ScoringViewModel(
     var allHolesScored by mutableStateOf(false)
         private set
 
-    var errorMessage by mutableStateOf<String?>(null)
+    var guidanceMessage by mutableStateOf<String?>(null)
         private set
 
     // Add this property to track par confirmation
@@ -86,8 +86,8 @@ class ScoringViewModel(
                 updateCurrentSection()
             } catch (e: Exception) {
                 // Handle error
-                errorMessage = "Error loading game: ${e.message}"
-                println(errorMessage)
+                setGuidance("Unable to load game details. Please try again.")
+                println(guidanceMessage)
             } finally {
                 isLoading = false
             }
@@ -124,8 +124,8 @@ class ScoringViewModel(
                 loadScoresForCurrentHole()
             } catch (e: Exception) {
                 // Handle error
-                errorMessage = "Error loading players: ${e.message}"
-                println(errorMessage)
+                setGuidance("Player information is loading. Please wait.")
+                println(guidanceMessage)
             }
         }
     }
@@ -138,8 +138,8 @@ class ScoringViewModel(
                 updateCurrentSection()
             } catch (e: Exception) {
                 // Handle error
-                errorMessage = "Error loading team pairings: ${e.message}"
-                println(errorMessage)
+                setGuidance("Team pairing information is loading. Please wait.")
+                println(guidanceMessage)
             }
         }
     }
@@ -167,8 +167,8 @@ class ScoringViewModel(
                 hasUnsavedChanges = false
             } catch (e: Exception) {
                 // Handle error
-                errorMessage = "Error loading scores: ${e.message}"
-                println(errorMessage)
+                setGuidance("Unable to load scores. Please try again.")
+                println(guidanceMessage)
             }
         }
     }
@@ -187,8 +187,8 @@ class ScoringViewModel(
                             }
                         }
             } catch (e: Exception) {
-                errorMessage = "Error checking hole completion: ${e.message}"
-                println(errorMessage)
+                setGuidance("Unable to check completion status. Please ensure all holes are scored.")
+                println(guidanceMessage)
             }
         }
     }
@@ -223,7 +223,7 @@ class ScoringViewModel(
     // Auto-save scores with callback
     fun autoSave(onComplete: () -> Unit = {}) {
         if (!isParValid()) {
-            setError("Please enter a par value (3-5)")
+            setGuidance("Please enter a par value between 3 and 5")
             return
         }
 
@@ -248,12 +248,12 @@ class ScoringViewModel(
                     checkAllHolesScored()
                     onComplete()
                 } else {
-                    setError("Please enter scores for all players")
+                    setGuidance("Please enter scores for all players")
                 }
             } catch (e: Exception) {
                 // Handle error
-                setError("Error saving scores: ${e.message}")
-                println(errorMessage)
+                setGuidance("Unable to save scores. Please try again.")
+                println(guidanceMessage)
             }
         }
     }
@@ -321,7 +321,7 @@ class ScoringViewModel(
                 updateCurrentHoleInGame()
             }
         } else {
-            setError("Please enter a valid hole number (1-18)")
+            setGuidance("Please enter a hole number between 1 and 18")
         }
     }
 
@@ -338,6 +338,7 @@ class ScoringViewModel(
         }
         return false
     }
+
     // Update current hole in the game entity
     private fun updateCurrentHoleInGame() {
         viewModelScope.launch {
@@ -348,7 +349,7 @@ class ScoringViewModel(
                 }
             } catch (e: Exception) {
                 // Handle error
-                println("Error updating current hole: ${e.message}")
+                println("Unable to update current hole: ${e.message}")
             }
         }
     }
@@ -388,13 +389,13 @@ class ScoringViewModel(
         return Pair(player1?.name ?: "", player2?.name ?: "")
     }
 
-    // Clear error message
-    fun clearError() {
-        errorMessage = null
+    // Clear guidance message
+    fun clearGuidance() {
+        guidanceMessage = null
     }
 
-    // Set error message
-    fun setError(message: String) {
-        errorMessage = message
+    // Set guidance message
+    fun setGuidance(message: String) {
+        guidanceMessage = message
     }
 }

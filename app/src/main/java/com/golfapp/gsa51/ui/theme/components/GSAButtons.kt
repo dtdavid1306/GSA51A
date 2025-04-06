@@ -1,23 +1,25 @@
 package com.golfapp.gsa51.ui.theme.components
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
 import com.golfapp.gsa51.ui.theme.GSAPurple
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.ui.draw.scale
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import kotlinx.coroutines.delay
 
 @Composable
 fun GSAPrimaryButton(
@@ -35,8 +37,28 @@ fun GSAPrimaryButton(
         targetValue = if (isPressed) 0.95f else 1f,
         label = "buttonScale"
     )
+
+    // Track if the press is valid (long enough to trigger action)
+    var pressedTime by remember { mutableStateOf(0L) }
+    var isPressConfirmed by remember { mutableStateOf(false) }
+
     Button(
-        onClick = onClick,
+        onClick = {
+            // We'll manually trigger onClick after checking press duration
+            val currentTime = System.currentTimeMillis()
+            if (pressedTime == 0L) {
+                // First press - record time
+                pressedTime = currentTime
+            } else {
+                // Check if press was long enough
+                val pressDuration = currentTime - pressedTime
+                if (pressDuration >= 150) { // 150ms minimum press
+                    onClick()
+                }
+                // Reset press tracking
+                pressedTime = 0L
+            }
+        },
         modifier = modifier
             .fillMaxWidth()
             .height(56.dp)
@@ -55,7 +77,7 @@ fun GSAPrimaryButton(
     }
 }
 
-// Update GSASecondaryButton to include animation
+// Update GSASecondaryButton to include similar functionality
 @Composable
 fun GSASecondaryButton(
     text: String,
@@ -73,8 +95,26 @@ fun GSASecondaryButton(
         label = "buttonScale"
     )
 
+    // Track if the press is valid (long enough to trigger action)
+    var pressedTime by remember { mutableStateOf(0L) }
+
     OutlinedButton(
-        onClick = onClick,
+        onClick = {
+            // We'll manually trigger onClick after checking press duration
+            val currentTime = System.currentTimeMillis()
+            if (pressedTime == 0L) {
+                // First press - record time
+                pressedTime = currentTime
+            } else {
+                // Check if press was long enough
+                val pressDuration = currentTime - pressedTime
+                if (pressDuration >= 150) { // 150ms minimum press
+                    onClick()
+                }
+                // Reset press tracking
+                pressedTime = 0L
+            }
+        },
         modifier = modifier
             .fillMaxWidth()
             .height(56.dp)
