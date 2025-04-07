@@ -61,12 +61,7 @@ fun IndividualGameSettingsScreen(
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Individual Game Settings",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Medium
-            )
-
+            // Instruction text - replacing the redundant title
             Text(
                 text = "Select which players will participate in the individual betting game. Players who opt-out will still participate in team games.",
                 style = MaterialTheme.typography.bodyMedium,
