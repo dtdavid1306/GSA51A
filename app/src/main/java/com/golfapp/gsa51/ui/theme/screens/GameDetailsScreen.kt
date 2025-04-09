@@ -26,6 +26,8 @@ import com.golfapp.gsa51.viewmodels.GameDetailsViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.unit.sp
+import com.golfapp.gsa51.ui.navigation.Screen
 import kotlinx.coroutines.launch
 import com.golfapp.gsa51.ui.theme.components.GSATopAppBar
 import com.golfapp.gsa51.ui.theme.components.GSATextField
@@ -43,6 +45,7 @@ fun GameDetailsScreen(
     onNavigateToIndividualSettings: (Long) -> Unit = {},
     onNavigateToGameRules: () -> Unit = {},
     onNavigateToSavedGames: () -> Unit = {},
+    onNavigateToAdvancedSettings: () -> Unit = {}, // Add this parameter
     onExitApp: () -> Unit = {},
     viewModel: GameDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
@@ -356,7 +359,7 @@ fun GameDetailsScreen(
                 )
             }
 
-            // Bottom buttons
+// Bottom buttons
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -407,9 +410,33 @@ fun GameDetailsScreen(
                     )
                 }
             }
+
+// Add this AFTER the existing buttons Row - still inside the main Column
+            Spacer(modifier = Modifier.height(8.dp))
+
+// Advanced Settings button - less prominent
+            OutlinedButton(
+                onClick = {
+                    onNavigateToAdvancedSettings() // Use the callback instead of direct navigation
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = GSAPurple.copy(alpha = 0.8f)
+                )
+            ) {
+                Text(
+                    text = "ADVANCED SETTINGS",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontSize = 12.sp
+                )
+            }
+
+// The closing bracket for the main Column should be here
         }
 
-        // Date picker dialog
+// Date picker dialog - This should be outside the main Column
         if (showDatePicker) {
             val datePickerState = rememberDatePickerState(
                 initialSelectedDateMillis = viewModel.gameDate.time

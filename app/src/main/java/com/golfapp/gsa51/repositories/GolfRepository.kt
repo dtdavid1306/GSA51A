@@ -33,7 +33,14 @@ class GolfRepository(private val database: GSA51Database) {
 
     fun getGameById(gameId: Long): Flow<Game> = database.gameDao().getGameById(gameId)
 
-    suspend fun createNewGame(location: String, date: Date, betUnit: Int, startingHole: Int = 1): Long {
+    // Update this function to include maxScoreLimit
+    suspend fun createNewGame(
+        location: String,
+        date: Date,
+        betUnit: Int,
+        startingHole: Int = 1,
+        maxScoreLimit: Int = 10 // Add this parameter with default value 10
+    ): Long {
         return database.gameDao().insertGame(
             Game(
                 location = location,
@@ -41,7 +48,8 @@ class GolfRepository(private val database: GSA51Database) {
                 betUnit = betUnit,
                 startingHole = startingHole,
                 currentHole = startingHole, // Initialize currentHole to startingHole
-                isCompleted = false
+                isCompleted = false,
+                maxScoreLimit = maxScoreLimit // Add this field
             )
         )
     }

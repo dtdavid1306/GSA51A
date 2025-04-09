@@ -29,6 +29,8 @@ import kotlinx.coroutines.delay
 import com.golfapp.gsa51.ui.theme.components.GSATopAppBar
 import com.golfapp.gsa51.ui.theme.components.GSAScoreField
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.res.painterResource
+import com.golfapp.gsa51.R
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -95,6 +97,18 @@ fun ScoringScreen(
         }
     }
 
+    // Add state variables for tooltips
+    var showScoreLimitTooltip by remember { mutableStateOf(false) }
+
+    // Auto-show tooltip for holes 1 and 10
+    LaunchedEffect(viewModel.currentHole) {
+        if (viewModel.currentHole == 1 || viewModel.currentHole == 10) {
+            showScoreLimitTooltip = true
+            // Auto-hide after 5 seconds
+            delay(5000)
+            showScoreLimitTooltip = false
+        }
+    }
     // Function to handle setting par
     val handleSetPar = {
         if (viewModel.confirmPar()) {
@@ -131,6 +145,41 @@ fun ScoringScreen(
                 .padding(horizontal = 16.dp, vertical = 4.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp) // Reduced spacing
         ) {
+            if (showScoreLimitTooltip) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFFE3F2FD) // Light blue background
+                        ),
+                        border = BorderStroke(1.dp, GSAPurple.copy(alpha = 0.5f))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_info),
+                                contentDescription = "Score Limit Info",
+                                tint = GSAPurple,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Scores limited to ${viewModel.maxScoreLimit}. Change in Advanced Settings.",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontSize = 11.sp
+                            )
+                        }
+                    }
+                }
+            }
+
             // Current Hole Display
             Text(
                 text = "Hole ${viewModel.currentHole}",

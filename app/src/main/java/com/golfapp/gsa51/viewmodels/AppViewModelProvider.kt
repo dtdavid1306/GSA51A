@@ -28,7 +28,8 @@ object AppViewModelProvider {
         initializer {
             ScoringViewModel(
                 repository = getApplication().container.golfRepository,
-                gameId = 0L  // Default value, will be set via initialize
+                preferencesManager = getApplication().container.preferencesManager, // Add this
+                gameId = 0L
             )
         }
         initializer {
@@ -58,6 +59,12 @@ object AppViewModelProvider {
             TeamPairingViewModel(
                 repository = getApplication().container.golfRepository,
                 gameId = 0L  // Default value, will be set via initialize
+            )
+        }
+        initializer {
+            AdvancedSettingsViewModel(
+                repository = getApplication().container.golfRepository,
+                preferencesManager = getApplication().container.preferencesManager // Add this
             )
         }
         initializer {

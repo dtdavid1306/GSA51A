@@ -33,6 +33,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import com.golfapp.gsa51.ui.theme.screens.AdvancedSettingsScreen
 
 // Define navigation routes
 sealed class Screen(val route: String) {
@@ -45,6 +46,7 @@ sealed class Screen(val route: String) {
     object FinalScoreDetails : Screen("final_score_details/{gameId}")
     object SavedGames : Screen("saved_games")
     object GameRules : Screen("game_rules")
+    object AdvancedSettings : Screen("advanced_settings")
 
     fun createRoute(vararg args: Pair<String, String>): String {
         var result = route
@@ -119,6 +121,9 @@ fun AppNavigation(navController: NavHostController) {
                 },
                 onNavigateToSavedGames = {
                     navController.navigate(Screen.SavedGames.route)
+                },
+                onNavigateToAdvancedSettings = { // Add this
+                    navController.navigate(Screen.AdvancedSettings.route)
                 }
             )
         }
@@ -166,7 +171,43 @@ fun AppNavigation(navController: NavHostController) {
                 }
             )
         }
-
+// Add this to the NavHost in AppNavigation.kt
+        composable(
+            route = Screen.AdvancedSettings.route,
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { 1000 },
+                    animationSpec = tween(300)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -1000 },
+                    animationSpec = tween(300)
+                ) + fadeOut(animationSpec = tween(300))
+            },
+            popEnterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { -1000 },
+                    animationSpec = tween(300)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { 1000 },
+                    animationSpec = tween(300)
+                ) + fadeOut(animationSpec = tween(300))
+            }
+        ) {
+            AdvancedSettingsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToGameRules = {
+                    navController.navigate(Screen.GameRules.route)
+                }
+            )
+        }
         composable(
             route = Screen.SavedGames.route,
             enterTransition = {

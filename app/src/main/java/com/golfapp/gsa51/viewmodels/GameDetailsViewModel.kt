@@ -32,6 +32,8 @@ class GameDetailsViewModel(private val repository: GolfRepository) : ViewModel()
     // Loading state
     var isLoading by mutableStateOf(false)
         private set
+    var maxScoreLimit by mutableStateOf(10)
+        private set
 
     // Update functions for each field
     fun updatePlayer1Name(name: String) {
@@ -65,6 +67,11 @@ class GameDetailsViewModel(private val repository: GolfRepository) : ViewModel()
     fun updateStartingHole(hole: Int) {
         // Default to 1 if saving a zero value
         startingHole = if (hole == 0) 0 else hole
+
+        // Add this function to update the max score limit
+        fun updateMaxScoreLimit(limit: Int) {
+            maxScoreLimit = limit
+        }
     }
 
     // Update the createGame function in GameDetailsViewModel to return the game ID
@@ -75,6 +82,11 @@ class GameDetailsViewModel(private val repository: GolfRepository) : ViewModel()
         val finalStartingHole = if (startingHole == 0) 1 else startingHole
 
         val gameId = repository.createNewGame(location, gameDate, finalBetUnit, finalStartingHole)
+            location
+            gameDate
+            finalBetUnit
+            finalStartingHole
+            maxScoreLimit // Add the max score limit
 
         // Now create player records for this game
         val players = listOf(

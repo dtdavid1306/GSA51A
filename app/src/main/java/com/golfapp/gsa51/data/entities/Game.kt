@@ -14,5 +14,6 @@ data class Game(
     val betUnit: Int,
     val startingHole: Int = 1, // New field with default value of 1
     val currentHole: Int = 1, // Add this new field
-    val isCompleted: Boolean = false
+    val isCompleted: Boolean = false,
+    val maxScoreLimit: Int = 10 // Add this new field with default value 10
 )
