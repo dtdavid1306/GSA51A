@@ -25,11 +25,13 @@ object AppViewModelProvider {
             )
         }
 // Add this initializer to the Factory
+        // In AppViewModelProvider.kt, update the Factory initializer for ScoringViewModel
+
         initializer {
             ScoringViewModel(
                 repository = getApplication().container.golfRepository,
-                preferencesManager = getApplication().container.preferencesManager, // Add this
-                gameId = 0L
+                preferencesManager = getApplication().container.preferencesManager, // Add this parameter
+                gameId = 0L  // Default value, will be set via initialize
             )
         }
         initializer {

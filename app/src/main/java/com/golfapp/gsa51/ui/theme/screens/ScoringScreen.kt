@@ -1,5 +1,6 @@
 package com.golfapp.gsa51.ui.theme.screens
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
@@ -97,18 +98,6 @@ fun ScoringScreen(
         }
     }
 
-    // Add state variables for tooltips
-    var showScoreLimitTooltip by remember { mutableStateOf(false) }
-
-    // Auto-show tooltip for holes 1 and 10
-    LaunchedEffect(viewModel.currentHole) {
-        if (viewModel.currentHole == 1 || viewModel.currentHole == 10) {
-            showScoreLimitTooltip = true
-            // Auto-hide after 5 seconds
-            delay(5000)
-            showScoreLimitTooltip = false
-        }
-    }
     // Function to handle setting par
     val handleSetPar = {
         if (viewModel.confirmPar()) {
@@ -145,37 +134,39 @@ fun ScoringScreen(
                 .padding(horizontal = 16.dp, vertical = 4.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp) // Reduced spacing
         ) {
-            if (showScoreLimitTooltip) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+            // Always show the tooltip - regardless of hole
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFE3F2FD) // Light blue background
+                    ),
+                    border = BorderStroke(1.dp, GSAPurple.copy(alpha = 0.5f))
                 ) {
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFFE3F2FD) // Light blue background
-                        ),
-                        border = BorderStroke(1.dp, GSAPurple.copy(alpha = 0.5f))
+                    Row(
+                        modifier = Modifier.padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier.padding(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_info),
-                                contentDescription = "Score Limit Info",
-                                tint = GSAPurple,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Scores limited to ${viewModel.maxScoreLimit}. Change in Advanced Settings.",
-                                style = MaterialTheme.typography.bodySmall,
-                                fontSize = 11.sp
-                            )
-                        }
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_info),
+                            contentDescription = "Score Limit Info",
+                            tint = GSAPurple,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        // Add logging to debug tooltip text
+                        val tooltipText = "Scores limited to ${viewModel.maxScoreLimit}. Change in Advanced Settings."
+                        Log.d("ScoringUI", "Displaying tooltip with limit: ${viewModel.maxScoreLimit}")
+                        Text(
+                            text = tooltipText,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontSize = 11.sp
+                        )
                     }
                 }
             }
@@ -378,9 +369,18 @@ fun ScoringScreen(
 
                         GSAScoreField(
                             value = scoreInputs[player.id] ?: "",
-                            onValueChange = {
-                                scoreInputs[player.id] = it
-                                viewModel.updateScore(player.id, it)
+                            onValueChange = { newValue ->
+                                // Check if the new value is a valid number and within the limit
+                                val score = newValue.toIntOrNull()
+                                if (score != null && score > viewModel.maxScoreLimit) {
+                                    // If invalid, clear the field completely and show error
+                                    scoreInputs[player.id] = "" // Clear the entire field
+                                    viewModel.setError("Score cannot exceed ${viewModel.maxScoreLimit}. Please enter a value between 1 and ${viewModel.maxScoreLimit}.")
+                                } else {
+                                    // If valid or empty, update normally
+                                    scoreInputs[player.id] = newValue
+                                    viewModel.updateScore(player.id, newValue)
+                                }
                             },
                             modifier = Modifier
                                 .width(70.dp)
@@ -516,6 +516,7 @@ fun ScoringScreen(
             Spacer(modifier = Modifier.height(4.dp))
         }
     }
+
 
     // Show loading indicator when needed
     if (viewModel.isLoading) {

@@ -17,10 +17,16 @@ import androidx.compose.ui.text.input.VisualTransformation
 import com.golfapp.gsa51.ui.theme.GSAPurple
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,14 +64,14 @@ fun GSATextField(
     )
 }
 
-// Modify the GSAScoreField component
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GSAScoreField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    keyboardActions: KeyboardActions = KeyboardActions.Default
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    maxValue: Int = Int.MAX_VALUE // Add this parameter
 ) {
     // Determine if we have a valid score (non-empty)
     val hasValidInput = remember(value) { derivedStateOf { value.isNotEmpty() } }
@@ -78,7 +84,14 @@ fun GSAScoreField(
 
     OutlinedTextField(
         value = value,
-        onValueChange = onValueChange,
+        onValueChange = { newValue ->
+            // For simple validation: If new value is empty, or is a number that's within the limit, accept it
+            if (newValue.isEmpty() ||
+                (newValue.all { it.isDigit() } && newValue.toIntOrNull()?.let { it <= maxValue } ?: false)) {
+                onValueChange(newValue)
+            }
+            // Otherwise, silently reject (don't update the value)
+        },
         modifier = modifier
             .clip(MaterialTheme.shapes.small)
             .background(backgroundColor),

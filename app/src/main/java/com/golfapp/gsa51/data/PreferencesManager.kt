@@ -1,4 +1,4 @@
-// Create a new file called PreferencesManager.kt in the data package
+// Create a new file: PreferencesManager.kt in the data package
 package com.golfapp.gsa51.data
 
 import android.content.Context
@@ -10,7 +10,7 @@ class PreferencesManager(context: Context) {
 
     companion object {
         private const val KEY_MAX_SCORE_LIMIT = "max_score_limit"
-        private const val DEFAULT_MAX_SCORE_LIMIT = 10
+        private const val DEFAULT_MAX_SCORE_LIMIT = 15  // Default set to 15
     }
 
     fun saveMaxScoreLimit(limit: Int) {

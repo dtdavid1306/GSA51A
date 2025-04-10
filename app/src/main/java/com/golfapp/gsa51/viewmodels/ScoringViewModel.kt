@@ -1,5 +1,6 @@
 package com.golfapp.gsa51.viewmodels
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -19,14 +20,11 @@ class ScoringViewModel(
     private val preferencesManager: PreferencesManager,
     private var gameId: Long = 0L
 ) : ViewModel() {
-    // Add a new state variable to store the maximum score limit
-    var maxScoreLimit by mutableStateOf(10)
+
+    // Initialize with default, will be properly set in initialize()
+    var maxScoreLimit by mutableStateOf(15)
         private set
 
-    init {
-        // Load the max score limit from preferences
-        maxScoreLimit = preferencesManager.getMaxScoreLimit()
-    }
     // UI State
     var game by mutableStateOf<Game?>(null)
         private set
@@ -74,21 +72,27 @@ class ScoringViewModel(
     // Initialize with game ID
     fun initialize(gameId: Long) {
         this.gameId = gameId
+
+        // Always get the max score limit from preferences first
+        maxScoreLimit = preferencesManager.getMaxScoreLimit()
+        Log.d("ScoringVM", "Loaded limit from preferences: $maxScoreLimit")
+
         loadGame()
         loadPlayers()
         loadTeamPairings()
         checkAllHolesScored()
     }
 
-    // Update the loadGame function to also load the maxScoreLimit
+    // Update the loadGame function to NOT override the maxScoreLimit
     private fun loadGame() {
         viewModelScope.launch {
             isLoading = true
             try {
                 val loadedGame = repository.getGameById(gameId).first()
                 game = loadedGame
-                // Load the max score limit from the game entity
-                maxScoreLimit = loadedGame.maxScoreLimit
+
+                // REMOVED: Don't override the max score limit from preferences
+                // maxScoreLimit = loadedGame.maxScoreLimit
 
                 // Set current hole to starting hole initially
                 game?.let {
@@ -207,16 +211,27 @@ class ScoringViewModel(
     }
 
 
-    // Update the updateScore function to validate against maxScoreLimit
+
     fun updateScore(playerId: Long, scoreStr: String) {
+        Log.d("ScoringVM", "Validating score: $scoreStr against limit: $maxScoreLimit")
+
         val score = scoreStr.toIntOrNull()
         if (score != null) {
-            // Validate against maxScoreLimit
+            // Check against the current maxScoreLimit
             if (score > maxScoreLimit) {
+                Log.d("ScoringVM", "Score $score exceeds limit $maxScoreLimit")
+                // Show error and clear the field
                 setError("Score cannot exceed $maxScoreLimit. Please enter a value between 1 and $maxScoreLimit.")
+
+                // Remove the invalid score
+                scores = scores.toMutableMap().apply {
+                    remove(playerId)  // Remove instead of update
+                }
+                hasUnsavedChanges = true
                 return
             }
 
+            // Valid score - update as normal
             scores = scores.toMutableMap().apply {
                 put(playerId, score)
             }
@@ -419,8 +434,9 @@ class ScoringViewModel(
         errorMessage = null
     }
 
-    // Set error message
+    // Update setError to add logging
     fun setError(message: String) {
+        Log.d("ScoringVM", "Setting error message: $message")
         errorMessage = message
     }
 }

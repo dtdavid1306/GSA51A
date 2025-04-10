@@ -1,5 +1,8 @@
+// Update AdvancedSettingsViewModel.kt to use PreferencesManager
+
 package com.golfapp.gsa51.viewmodels
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,10 +14,11 @@ import kotlinx.coroutines.launch
 
 class AdvancedSettingsViewModel(
     private val repository: GolfRepository,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager // Add this parameter
 ) : ViewModel() {
 
-    var maxScoreLimit by mutableStateOf(10)
+    // Initialize with the stored value, not hardcoded 10
+    var maxScoreLimit by mutableStateOf(preferencesManager.getMaxScoreLimit())
         private set
 
     var isLoading by mutableStateOf(false)
@@ -22,11 +26,6 @@ class AdvancedSettingsViewModel(
 
     var saveSuccessMessage by mutableStateOf<String?>(null)
         private set
-
-    init {
-        // Load the saved preference
-        maxScoreLimit = preferencesManager.getMaxScoreLimit()
-    }
 
     fun updateMaxScoreLimit(limit: Int) {
         maxScoreLimit = limit
@@ -36,6 +35,8 @@ class AdvancedSettingsViewModel(
         viewModelScope.launch {
             isLoading = true
             try {
+                Log.d("AdvSettings", "Saving limit: $maxScoreLimit")
+
                 // Save to SharedPreferences
                 preferencesManager.saveMaxScoreLimit(maxScoreLimit)
 

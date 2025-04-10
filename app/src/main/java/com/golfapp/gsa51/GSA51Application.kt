@@ -15,6 +15,8 @@ class GSA51Application : Application() {
     }
 }
 
+// Update GSA51Application.kt to add PreferencesManager to AppContainer
+
 interface AppContainer {
     val golfRepository: GolfRepository
     val preferencesManager: PreferencesManager // Add this line
