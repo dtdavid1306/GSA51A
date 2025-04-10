@@ -1,27 +1,32 @@
 package com.golfapp.gsa51.ui.theme.screens
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.golfapp.gsa51.R
 import com.golfapp.gsa51.ui.theme.GSAPurple
+import com.golfapp.gsa51.ui.theme.components.GSATopAppBar
+import com.golfapp.gsa51.utils.HapticFeedback
 import com.golfapp.gsa51.viewmodels.AppViewModelProvider
 import com.golfapp.gsa51.viewmodels.TeamPairingViewModel
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.ui.draw.rotate
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.shape.RoundedCornerShape
-import com.golfapp.gsa51.ui.theme.components.GSATopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,6 +48,7 @@ fun TeamPairingsScreen(
     }
 
     val scrollState = rememberScrollState()
+    val context = LocalContext.current
 
     // State for restart confirmation dialog
     var showRestartConfirmation by remember { mutableStateOf(false) }
@@ -136,6 +142,7 @@ fun TeamPairingsScreen(
                 // RESTART button - now on the left
                 OutlinedButton(
                     onClick = {
+                        HapticFeedback.performLightClick(context)
                         // Show confirmation dialog
                         showRestartConfirmation = true
                     },
@@ -156,7 +163,10 @@ fun TeamPairingsScreen(
                 val buttonColor = if (viewModel.allSelectionsComplete) Color(0xFF4CAF50) else GSAPurple
 
                 Button(
-                    onClick = { onNavigateToScoring(gameId) },
+                    onClick = {
+                        HapticFeedback.performMediumClick(context)
+                        onNavigateToScoring(gameId)
+                    },
                     modifier = Modifier
                         .weight(1f)
                         .height(50.dp),
@@ -184,6 +194,7 @@ fun TeamPairingsScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
+                        HapticFeedback.performLightClick(context)
                         viewModel.resetSelections()
                         showRestartConfirmation = false
                     },
@@ -218,6 +229,100 @@ fun TeamPairingsScreen(
     }
 }
 
+@Composable
+fun TeamPairingOptionCard(
+    pairingOption: TeamPairingViewModel.PairingOption,
+    isSelected: Boolean,
+    onSelect: () -> Unit
+) {
+    val context = LocalContext.current
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .clickable {
+                HapticFeedback.performLightClick(context)
+                onSelect()
+            },
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) Color(0xFFE8F5E9) else Color.White
+        ),
+        border = BorderStroke(
+            width = if (isSelected) 2.dp else 1.dp,
+            color = if (isSelected) GSAPurple else Color.LightGray
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (isSelected) 4.dp else 1.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(10.dp)
+        ) {
+            // Extract team info from the description
+            val teams = pairingOption.description.split(" vs ")
+
+            // Team 1
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Team 1:",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = GSAPurple
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = teams[0],
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // Team 2
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Team 2:",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = GSAPurple
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+
+                if (teams.size > 1) {
+                    Text(
+                        text = teams[1],
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
+            // Selected indicator
+            if (isSelected) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Selected",
+                        tint = GSAPurple
+                    )
+                }
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SectionCard(
@@ -230,12 +335,14 @@ fun SectionCard(
     onPairingSelected: (TeamPairingViewModel.PairingOption) -> Unit,
     onConfirmClick: () -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val isCompleted = status == "Completed" // Add this line to check completion status
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 4.dp)
+            .animateContentSize(),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),
@@ -246,8 +353,8 @@ fun SectionCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp), // Reduced padding
-            verticalArrangement = Arrangement.spacedBy(6.dp) // Reduced spacing
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             // Header row with title and status
             Row(
@@ -268,110 +375,35 @@ fun SectionCard(
                 )
             }
 
-            // Only show dropdown and team info if enabled
-            if (isEnabled) {
-                // Custom dropdown implementation with reduced vertical space
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(4.dp) // Reduced spacing
-                ) {
-                    // Custom dropdown field
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable(enabled = isEnabled) { expanded = !expanded },
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color.White
-                        ),
-                        border = BorderStroke(1.dp, if (expanded) GSAPurple else Color.Gray),
-                        shape = RoundedCornerShape(4.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 12.dp, vertical = 8.dp), // Reduced padding
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = selectedPairing?.description ?: "Select pairing",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = if (selectedPairing == null) Color.Gray else Color.Black
-                            )
+            // Only show options if enabled AND not completed
+            if (isEnabled && !isCompleted) {
+                // Text label
+                Text(
+                    text = "Select a team pairing for $title:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
 
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_back),
-                                contentDescription = "Dropdown",
-                                modifier = Modifier.rotate(90f), // Rotate to make it point down
-                                tint = GSAPurple
-                            )
-                        }
-                    }
-
-                    // Dropdown menu
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
-                        modifier = Modifier
-                            .fillMaxWidth(0.95f)
-                            .background(Color.White)
-                    ) {
-                        pairingOptions.forEach { option ->
-                            DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        text = option.description,
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                },
-                                onClick = {
-                                    onPairingSelected(option)
-                                    expanded = false
-                                }
-                            )
-                        }
-                    }
+                // Display team pairing options as cards
+                pairingOptions.forEach { option ->
+                    TeamPairingOptionCard(
+                        pairingOption = option,
+                        isSelected = selectedPairing?.id == option.id,
+                        onSelect = { onPairingSelected(option) }
+                    )
                 }
 
-                // Show selected teams when a pairing is selected
+                // Confirm button if a pairing is selected
                 if (selectedPairing != null) {
-                    // More compact display of team members
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 4.dp), // Reduced padding
-                        verticalArrangement = Arrangement.spacedBy(2.dp) // Reduced spacing
-                    ) {
-                        val description = selectedPairing.description
-                        val teams = description.split(" vs ")
-
-                        if (teams.size == 2) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = "Team 1: ${teams[0]}",
-                                    style = MaterialTheme.typography.bodySmall // Smaller text
-                                )
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = "Team 2: ${teams[1]}",
-                                    style = MaterialTheme.typography.bodySmall // Smaller text
-                                )
-                            }
-                        }
-                    }
-
-                    // Confirm button
                     Button(
-                        onClick = onConfirmClick,
+                        onClick = {
+                            HapticFeedback.performMediumClick(context)
+                            onConfirmClick()
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 4.dp) // Reduced padding
-                            .height(40.dp), // Shorter button
+                            .padding(top = 8.dp)
+                            .height(40.dp),
                         enabled = selectedPairing != null,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = GSAPurple
@@ -379,17 +411,17 @@ fun SectionCard(
                     ) {
                         Text(
                             text = "CONFIRM",
-                            style = MaterialTheme.typography.labelSmall // Smaller text
+                            style = MaterialTheme.typography.labelSmall
                         )
                     }
                 }
             } else if (selectedPairing != null) {
-                // If disabled but has a selected pairing, show the teams in a more compact format
+                // If disabled or completed but has a selected pairing, show the teams
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 4.dp), // Reduced padding
-                    verticalArrangement = Arrangement.spacedBy(2.dp) // Reduced spacing
+                        .padding(top = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     val description = selectedPairing.description
                     val teams = description.split(" vs ")
@@ -400,7 +432,7 @@ fun SectionCard(
                         ) {
                             Text(
                                 text = "Team 1: ${teams[0]}",
-                                style = MaterialTheme.typography.bodySmall // Smaller text
+                                style = MaterialTheme.typography.bodySmall
                             )
                         }
                         Row(
@@ -408,7 +440,7 @@ fun SectionCard(
                         ) {
                             Text(
                                 text = "Team 2: ${teams[1]}",
-                                style = MaterialTheme.typography.bodySmall // Smaller text
+                                style = MaterialTheme.typography.bodySmall
                             )
                         }
                     }

@@ -8,12 +8,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.golfapp.gsa51.ui.theme.GSAPurple
 import com.golfapp.gsa51.ui.theme.components.GSATopAppBar
 import com.golfapp.gsa51.ui.theme.components.GSAPrimaryButton
+import com.golfapp.gsa51.utils.HapticFeedback
 import com.golfapp.gsa51.viewmodels.AdvancedSettingsViewModel
 import com.golfapp.gsa51.viewmodels.AppViewModelProvider
 
@@ -25,6 +27,7 @@ fun AdvancedSettingsScreen(
     viewModel: AdvancedSettingsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val scrollState = rememberScrollState()
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -98,6 +101,7 @@ fun AdvancedSettingsScreen(
             GSAPrimaryButton(
                 text = "SAVE SETTINGS",
                 onClick = {
+                    HapticFeedback.performMediumClick(context)
                     viewModel.saveSettings {
                         // Wait a moment to show success message before navigating back
                         // This would normally be handled by the ViewModel's saveSettings method

@@ -30,8 +30,12 @@ import kotlinx.coroutines.delay
 import com.golfapp.gsa51.ui.theme.components.GSATopAppBar
 import com.golfapp.gsa51.ui.theme.components.GSAScoreField
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import com.golfapp.gsa51.R
+import com.golfapp.gsa51.utils.HapticFeedback
+import androidx.compose.ui.platform.LocalContext
+
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -57,6 +61,9 @@ fun ScoringScreen(
 
     // Keep track of score inputs for each player
     val scoreInputs = remember { mutableStateMapOf<Long, String>() }
+
+    val context = LocalContext.current
+
 
     // Par input state
     var parInput by remember { mutableStateOf("") }
@@ -470,7 +477,10 @@ fun ScoringScreen(
 
                 // SAVE GAME button (in the middle)
                 Button(
-                    onClick = { viewModel.saveScores() },
+                    onClick = {
+                        HapticFeedback.performMediumClick(context)
+                        viewModel.saveScores()
+                    },
                     modifier = Modifier
                         .weight(0.34f)
                         .height(48.dp),
@@ -484,7 +494,6 @@ fun ScoringScreen(
                         fontWeight = FontWeight.Medium
                     )
                 }
-
                 // NEXT button
                 Button(
                     onClick = {

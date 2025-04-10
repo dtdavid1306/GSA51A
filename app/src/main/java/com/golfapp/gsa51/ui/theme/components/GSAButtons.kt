@@ -35,6 +35,7 @@ fun GSAPrimaryButton(
         targetValue = if (isPressed) 0.95f else 1f,
         label = "buttonScale"
     )
+
     Button(
         onClick = onClick,
         modifier = modifier

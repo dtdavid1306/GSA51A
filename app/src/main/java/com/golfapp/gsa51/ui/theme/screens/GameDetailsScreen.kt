@@ -26,6 +26,7 @@ import com.golfapp.gsa51.viewmodels.GameDetailsViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import com.golfapp.gsa51.ui.navigation.Screen
 import kotlinx.coroutines.launch
@@ -35,6 +36,8 @@ import com.golfapp.gsa51.ui.theme.components.GSAPrimaryButton
 import com.golfapp.gsa51.ui.theme.components.GSASecondaryButton
 import com.golfapp.gsa51.ui.theme.GSAPurple
 import com.golfapp.gsa51.ui.theme.components.Tooltip
+import androidx.compose.ui.platform.LocalContext
+
 
 // Define the GSA purple color
 val GSAPurple = Color(0xFF6200EE)
@@ -59,6 +62,7 @@ fun GameDetailsScreen(
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
