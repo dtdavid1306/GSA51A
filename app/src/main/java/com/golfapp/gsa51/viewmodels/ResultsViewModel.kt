@@ -26,10 +26,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.golfapp.gsa51.data.PreferencesManager
 
 
 class ResultsViewModel(
     private val repository: GolfRepository,
+    private val preferencesManager: PreferencesManager,
     private var gameId: Long = 0L
 ) : ViewModel() {
     // UI State
@@ -49,6 +51,10 @@ class ResultsViewModel(
         private set
 
     var isLoading by mutableStateOf(false)
+        private set
+
+    // Add currency symbol state
+    var currencySymbol by mutableStateOf(preferencesManager.getCurrencySymbol())
         private set
 
     // Private backing field with direct assignment
@@ -304,6 +310,7 @@ class ResultsViewModel(
             }
         }
     }
+
     // Initialize with game ID
     fun initialize(gameId: Long) {
         this.gameId = gameId
@@ -566,6 +573,7 @@ class ResultsViewModel(
 
         return GameResult(wins, draws, losses, winnings)
     }
+
     // Generate a sharable report of game results
     fun generateShareableReport(): String {
         val report = StringBuilder()
@@ -576,7 +584,10 @@ class ResultsViewModel(
             report.append("----------------\n")
             report.append("Location: ${game.location}\n")
             report.append("Date: ${SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(game.date)}\n")
-            report.append("Bet Unit: $${game.betUnit}\n\n")
+
+            // Use the stored currency symbol
+            val displayCurrency = if (currencySymbol == "GSA_LOGO") "GSA" else currencySymbol
+            report.append("Bet Unit: $displayCurrency${game.betUnit}\n\n")
         }
 
         // PART 1: SUMMARY
@@ -588,7 +599,9 @@ class ResultsViewModel(
         playerResults.values.forEach { result ->
             val playerName = result.player.name
             if (result.player.participateInIndividualGame) {
-                report.append("$playerName: W${result.individualWins} D${result.individualDraws} L${result.individualLosses} = $${String.format("%.2f", result.individualWinnings)}\n")
+                // Use the stored currency symbol
+                val displayCurrency = if (currencySymbol == "GSA_LOGO") "GSA" else currencySymbol
+                report.append("$playerName: W${result.individualWins} D${result.individualDraws} L${result.individualLosses} = $displayCurrency${String.format("%.2f", result.individualWinnings)}\n")
             } else {
                 report.append("$playerName: Did not participate\n")
             }
@@ -598,7 +611,9 @@ class ResultsViewModel(
         report.append("\nTEAM GAME:\n")
         playerResults.values.forEach { result ->
             val playerName = result.player.name
-            report.append("$playerName: W${result.teamWins} D${result.teamDraws} L${result.teamLosses} = $${String.format("%.2f", result.teamWinnings)}\n")
+            // Use the stored currency symbol
+            val displayCurrency = if (currencySymbol == "GSA_LOGO") "GSA" else currencySymbol
+            report.append("$playerName: W${result.teamWins} D${result.teamDraws} L${result.teamLosses} = $displayCurrency${String.format("%.2f", result.teamWinnings)}\n")
         }
 
         // Combined totals
@@ -606,11 +621,14 @@ class ResultsViewModel(
         val sortedResults = playerResults.values.toList().sortedByDescending { it.combinedWinnings }
         for (result in sortedResults) {
             val playerName = result.player.name
-            report.append("$playerName: $${String.format("%.2f", result.combinedWinnings)}\n")
+            // Use the stored currency symbol
+            val displayCurrency = if (currencySymbol == "GSA_LOGO") "GSA" else currencySymbol
+            report.append("$playerName: $displayCurrency${String.format("%.2f", result.combinedWinnings)}\n")
         }
 
         return report.toString()
     }
+
     data class PlayerResult(
         val player: Player,
         val totalScore: Int,

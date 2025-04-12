@@ -1,5 +1,3 @@
-// Update AdvancedSettingsViewModel.kt to use PreferencesManager
-
 package com.golfapp.gsa51.viewmodels
 
 import android.util.Log
@@ -14,12 +12,19 @@ import kotlinx.coroutines.launch
 
 class AdvancedSettingsViewModel(
     private val repository: GolfRepository,
-    private val preferencesManager: PreferencesManager // Add this parameter
+    private val preferencesManager: PreferencesManager
 ) : ViewModel() {
 
     // Initialize with the stored value, not hardcoded 10
     var maxScoreLimit by mutableStateOf(preferencesManager.getMaxScoreLimit())
         private set
+
+    // Add currency symbol state
+    var currencySymbol by mutableStateOf(preferencesManager.getCurrencySymbol())
+        private set
+
+    // Available currency symbols
+    val availableCurrencySymbols = listOf("$", "€", "£", "¥", "₹", "GSA_LOGO")
 
     var isLoading by mutableStateOf(false)
         private set
@@ -31,14 +36,21 @@ class AdvancedSettingsViewModel(
         maxScoreLimit = limit
     }
 
+    // Add method to update currency symbol
+    fun updateCurrencySymbol(symbol: String) {
+        currencySymbol = symbol
+    }
+
     fun saveSettings(onComplete: () -> Unit = {}) {
         viewModelScope.launch {
             isLoading = true
             try {
                 Log.d("AdvSettings", "Saving limit: $maxScoreLimit")
+                Log.d("AdvSettings", "Saving currency: $currencySymbol")
 
                 // Save to SharedPreferences
                 preferencesManager.saveMaxScoreLimit(maxScoreLimit)
+                preferencesManager.saveCurrencySymbol(currencySymbol)
 
                 saveSuccessMessage = "Settings saved successfully"
 

@@ -37,7 +37,7 @@ import com.golfapp.gsa51.ui.theme.components.GSASecondaryButton
 import com.golfapp.gsa51.ui.theme.GSAPurple
 import com.golfapp.gsa51.ui.theme.components.Tooltip
 import androidx.compose.ui.platform.LocalContext
-
+import com.golfapp.gsa51.utils.HapticFeedback
 
 // Define the GSA purple color
 val GSAPurple = Color(0xFF6200EE)
@@ -166,26 +166,84 @@ fun GameDetailsScreen(
                             text = "Bet Unit",
                             style = MaterialTheme.typography.bodyMedium
                         )
-                        GSATextField(
-                            value = if (viewModel.betUnit == 0) "" else viewModel.betUnit.toString(),
-                            onValueChange = {
-                                if (it.isEmpty()) {
-                                    viewModel.updateBetUnit(0)
-                                } else {
-                                    it.toIntOrNull()?.let { value ->
-                                        viewModel.updateBetUnit(value)
-                                    }
+
+                        // For GSA_LOGO we need a custom field with the logo
+                        if (viewModel.currencySymbol == "GSA_LOGO") {
+                            Box(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                // The main text field
+                                GSATextField(
+                                    value = if (viewModel.betUnit == 0) "" else viewModel.betUnit.toString(),
+                                    onValueChange = {
+                                        if (it.isEmpty()) {
+                                            viewModel.updateBetUnit(0)
+                                        } else {
+                                            it.toIntOrNull()?.let { value ->
+                                                viewModel.updateBetUnit(value)
+                                            }
+                                        }
+                                    },
+                                    placeholder = "enter bet unit",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(56.dp)
+                                        .padding(start = 40.dp), // Make room for the logo
+                                    singleLine = true,
+                                    keyboardOptions = KeyboardOptions(
+                                        keyboardType = KeyboardType.Number,
+                                        imeAction = ImeAction.Next
+                                    ),
+                                    keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Right) })
+                                )
+
+                                // GSA Logo placeholder - replace with actual logo when available
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.CenterStart)
+                                        .padding(start = 12.dp)
+                                        .size(24.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "GSA",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = GSAPurple
+                                    )
+                                    // Uncomment when the real logo is available
+                                    /*
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_gsa_logo),
+                                        contentDescription = "GSA Logo",
+                                        tint = GSAPurple,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    */
                                 }
-                            },
-                            placeholder = "$ enter bet unit",
-                            modifier = Modifier.height(56.dp),
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Number,
-                                imeAction = ImeAction.Next
-                            ),
-                            keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Right) })
-                        )
+                            }
+                        } else {
+                            // Regular currency symbol text field
+                            GSATextField(
+                                value = if (viewModel.betUnit == 0) "" else viewModel.betUnit.toString(),
+                                onValueChange = {
+                                    if (it.isEmpty()) {
+                                        viewModel.updateBetUnit(0)
+                                    } else {
+                                        it.toIntOrNull()?.let { value ->
+                                            viewModel.updateBetUnit(value)
+                                        }
+                                    }
+                                },
+                                placeholder = "${viewModel.currencySymbol} enter bet unit",
+                                modifier = Modifier.height(56.dp),
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Number,
+                                    imeAction = ImeAction.Next
+                                ),
+                                keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Right) })
+                            )
+                        }
                     }
 
                     // Starting Hole with tooltip
@@ -363,7 +421,7 @@ fun GameDetailsScreen(
                 )
             }
 
-// Bottom buttons
+            // Bottom buttons
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -415,32 +473,59 @@ fun GameDetailsScreen(
                 }
             }
 
-// Add this AFTER the existing buttons Row - still inside the main Column
+            // Add this AFTER the existing buttons Row - still inside the main Column
             Spacer(modifier = Modifier.height(8.dp))
 
-// Advanced Settings button - less prominent
-            OutlinedButton(
-                onClick = {
-                    onNavigateToAdvancedSettings() // Use the callback instead of direct navigation
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(40.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = GSAPurple.copy(alpha = 0.8f)
-                )
+            // Row for NEW GAME and GAME SETTINGS buttons side by side
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(
-                    text = "ADVANCED SETTINGS",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontSize = 12.sp
-                )
+                // New Game button - on the left
+                OutlinedButton(
+                    onClick = {
+                        // Call the reset fields method and add haptic feedback
+                        viewModel.resetFields()
+                        HapticFeedback.performLightClick(context)
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(40.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = GSAPurple.copy(alpha = 0.8f)
+                    )
+                ) {
+                    Text(
+                        text = "NEW GAME",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontSize = 12.sp
+                    )
+                }
+
+                // Game Settings button - renamed from "ADVANCED SETTINGS"
+                OutlinedButton(
+                    onClick = {
+                        onNavigateToAdvancedSettings()
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(40.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = GSAPurple.copy(alpha = 0.8f)
+                    )
+                ) {
+                    Text(
+                        text = "GAME SETTINGS",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontSize = 12.sp
+                    )
+                }
             }
 
-// The closing bracket for the main Column should be here
+            // The closing bracket for the main Column should be here
         }
 
-// Date picker dialog - This should be outside the main Column
+        // Date picker dialog - This should be outside the main Column
         if (showDatePicker) {
             val datePickerState = rememberDatePickerState(
                 initialSelectedDateMillis = viewModel.gameDate.time

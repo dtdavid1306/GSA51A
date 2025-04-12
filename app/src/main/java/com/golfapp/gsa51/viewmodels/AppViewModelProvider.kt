@@ -12,72 +12,74 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import kotlinx.coroutines.delay
 
-// Add this key definition
-//object GameIdKey : CreationExtras.Key<Long> {
-    //override val name: String = "GameId"
-//}
-
 object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
             GameDetailsViewModel(
-                repository = getApplication().container.golfRepository
+                repository = getApplication().container.golfRepository,
+                preferencesManager = getApplication().container.preferencesManager  // Add this
             )
         }
-// Add this initializer to the Factory
-        // In AppViewModelProvider.kt, update the Factory initializer for ScoringViewModel
 
         initializer {
             ScoringViewModel(
                 repository = getApplication().container.golfRepository,
-                preferencesManager = getApplication().container.preferencesManager, // Add this parameter
-                gameId = 0L  // Default value, will be set via initialize
+                preferencesManager = getApplication().container.preferencesManager,
+                gameId = 0L
             )
         }
+
         initializer {
             SavedGamesViewModel(
                 repository = getApplication().container.golfRepository
             )
         }
+
+        // In AppViewModelProvider.kt, update the ResultsViewModel initializer
         initializer {
             ResultsViewModel(
                 repository = getApplication().container.golfRepository,
-                gameId = 0L  // Default value, will be set via initialize
+                preferencesManager = getApplication().container.preferencesManager, // Add this
+                gameId = 0L
             )
         }
-        initializer {
-            ResultsViewModel(
-                repository = getApplication().container.golfRepository,
-                gameId = 0L  // Default value, will be set via initialize
-            )
-        }
+
         initializer {
             IndividualGameSettingsViewModel(
                 repository = getApplication().container.golfRepository,
-                gameId = 0L  // Default value, will be set via initialize
+                gameId = 0L
             )
         }
+
         initializer {
             TeamPairingViewModel(
                 repository = getApplication().container.golfRepository,
-                gameId = 0L  // Default value, will be set via initialize
+                gameId = 0L
             )
         }
+
         initializer {
             AdvancedSettingsViewModel(
                 repository = getApplication().container.golfRepository,
-                preferencesManager = getApplication().container.preferencesManager // Add this
+                preferencesManager = getApplication().container.preferencesManager
+            )
+        }
+// Update the ResultsViewModel initializer in AppViewModelProvider.kt
+        initializer {
+            ResultsViewModel(
+                repository = getApplication().container.golfRepository,
+                preferencesManager = getApplication().container.preferencesManager, // Add this
+                gameId = 0L
             )
         }
         initializer {
             FinalScoreDetailsViewModel(
                 repository = getApplication().container.golfRepository,
-                gameId = 0L  // Default value, will be set via initialize
+                gameId = 0L
             )
         }
     }
 }
-
 
 /**
  * Extension function to queries for [Application] object and returns an instance of

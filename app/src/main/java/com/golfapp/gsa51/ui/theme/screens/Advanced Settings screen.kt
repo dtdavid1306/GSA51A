@@ -18,6 +18,13 @@ import com.golfapp.gsa51.ui.theme.components.GSAPrimaryButton
 import com.golfapp.gsa51.utils.HapticFeedback
 import com.golfapp.gsa51.viewmodels.AdvancedSettingsViewModel
 import com.golfapp.gsa51.viewmodels.AppViewModelProvider
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import com.golfapp.gsa51.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,7 +39,7 @@ fun AdvancedSettingsScreen(
     Scaffold(
         topBar = {
             GSATopAppBar(
-                title = "Advanced Settings",
+                title = "Game Settings",
                 showBackButton = true,
                 onBackClick = onNavigateBack,
                 onInfoClick = onNavigateToGameRules
@@ -47,6 +54,7 @@ fun AdvancedSettingsScreen(
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Maximum Score Limit Section
             Text(
                 text = "Maximum Score Limit",
                 style = MaterialTheme.typography.titleMedium
@@ -84,6 +92,83 @@ fun AdvancedSettingsScreen(
                 }
             }
 
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+            // Currency Symbol Section
+            Text(
+                text = "Currency Symbol",
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Text(
+                text = "Select the currency symbol to use for bet units",
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            // Currency Options
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+            ) {
+                // Currency selection row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Standard currency symbols
+                    listOf("$", "€", "£", "¥", "₹").forEach { symbol ->
+                        CurrencyOption(
+                            symbol = symbol,
+                            isSelected = viewModel.currencySymbol == symbol,
+                            onSelect = {
+                                HapticFeedback.performLightClick(context)
+                                viewModel.updateCurrencySymbol(symbol)
+                            }
+                        )
+                    }
+
+                    // GSA Logo option (placeholder for now)
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .border(
+                                width = if (viewModel.currencySymbol == "GSA_LOGO") 2.dp else 1.dp,
+                                color = if (viewModel.currencySymbol == "GSA_LOGO") GSAPurple else Color.Gray,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .clickable {
+                                HapticFeedback.performLightClick(context)
+                                viewModel.updateCurrencySymbol("GSA_LOGO")
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        // Placeholder for GSA logo
+                        Text(
+                            text = "GSA",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (viewModel.currencySymbol == "GSA_LOGO") GSAPurple else Color.Gray
+                        )
+                        /* Uncomment this when you have the actual icon
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_gsa_logo),
+                            contentDescription = "GSA Logo",
+                            tint = if (viewModel.currencySymbol == "GSA_LOGO") GSAPurple else Color.Gray,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        */
+                    }
+                }
+
+                // Show selected currency
+                Text(
+                    text = "Selected: ${if (viewModel.currencySymbol == "GSA_LOGO") "GSA Logo" else viewModel.currencySymbol}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+
             Spacer(modifier = Modifier.weight(1f))
 
             // Show success message if present
@@ -118,5 +203,31 @@ fun AdvancedSettingsScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun CurrencyOption(
+    symbol: String,
+    isSelected: Boolean,
+    onSelect: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .border(
+                width = if (isSelected) 2.dp else 1.dp,
+                color = if (isSelected) GSAPurple else Color.Gray,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .clickable(onClick = onSelect),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = symbol,
+            style = MaterialTheme.typography.headlineSmall,
+            color = if (isSelected) GSAPurple else Color.Gray
+        )
     }
 }

@@ -7,8 +7,12 @@ import androidx.lifecycle.ViewModel
 import com.golfapp.gsa51.repositories.GolfRepository
 import java.util.Date
 import com.golfapp.gsa51.data.entities.Player  // Add this import
+import com.golfapp.gsa51.data.PreferencesManager
 
-class GameDetailsViewModel(private val repository: GolfRepository) : ViewModel() {
+class GameDetailsViewModel(
+    private val repository: GolfRepository,
+    private val preferencesManager: PreferencesManager
+) : ViewModel() {
     // State for player names
     var player1Name by mutableStateOf("")
         private set
@@ -33,6 +37,10 @@ class GameDetailsViewModel(private val repository: GolfRepository) : ViewModel()
     var isLoading by mutableStateOf(false)
         private set
     var maxScoreLimit by mutableStateOf(10)
+        private set
+
+    // Add currency symbol state
+    var currencySymbol by mutableStateOf(preferencesManager.getCurrencySymbol())
         private set
 
     // Update functions for each field
@@ -64,6 +72,19 @@ class GameDetailsViewModel(private val repository: GolfRepository) : ViewModel()
         betUnit = newBetUnit
     }
 
+    // Simple method to reset all input fields
+    fun resetFields() {
+        player1Name = ""
+        player2Name = ""
+        player3Name = ""
+        player4Name = ""
+        location = ""
+        gameDate = Date() // Reset to current date
+        betUnit = 0
+        startingHole = 0
+
+
+    }
     fun updateStartingHole(hole: Int) {
         // Default to 1 if saving a zero value
         startingHole = if (hole == 0) 0 else hole
@@ -81,12 +102,13 @@ class GameDetailsViewModel(private val repository: GolfRepository) : ViewModel()
         val finalBetUnit = if (betUnit == 0) 1 else betUnit
         val finalStartingHole = if (startingHole == 0) 1 else startingHole
 
-        val gameId = repository.createNewGame(location, gameDate, finalBetUnit, finalStartingHole)
-            location
-            gameDate
-            finalBetUnit
-            finalStartingHole
-            maxScoreLimit // Add the max score limit
+        val gameId = repository.createNewGame(
+            location,
+            gameDate,
+            finalBetUnit,
+            finalStartingHole,
+            preferencesManager.getMaxScoreLimit() // Get from preferences
+        )
 
         // Now create player records for this game
         val players = listOf(

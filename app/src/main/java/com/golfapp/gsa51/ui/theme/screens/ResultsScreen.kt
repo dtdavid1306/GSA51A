@@ -139,7 +139,31 @@ fun ResultsScreen(
                                     ).format(game.date)
                                 }"
                             )
-                            Text("Bet Value: $${game.betUnit}")
+
+                            // Use the selected currency symbol
+                            if (viewModel.currencySymbol == "GSA_LOGO") {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text("Bet Value: ")
+                                    // GSA Logo placeholder (replace with actual logo when available)
+                                    Text(
+                                        text = "GSA",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = GSAPurple
+                                    )
+                                    /*
+                                    // Uncomment when the real logo is available
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_gsa_logo),
+                                        contentDescription = "GSA Logo",
+                                        tint = GSAPurple,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    */
+                                    Text("${game.betUnit}")
+                                }
+                            } else {
+                                Text("Bet Value: ${viewModel.currencySymbol}${game.betUnit}")
+                            }
                         }
                     }
                 }
@@ -164,30 +188,79 @@ fun ResultsScreen(
                             // Only show individual game results if player participated
                             if (result.player.participateInIndividualGame) {
                                 Text("Individual Game: W${result.individualWins} D${result.individualDraws} L${result.individualLosses}")
-                                Text(
-                                    "Individual Game Total: $${
-                                        String.format(
-                                            "%.2f",
-                                            result.individualWinnings
+
+                                // Individual game amount
+                                if (viewModel.currencySymbol == "GSA_LOGO") {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text("Individual Game Total: ")
+                                        // GSA Logo placeholder (replace with actual logo when available)
+                                        Text(
+                                            text = "GSA",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = GSAPurple
                                         )
-                                    }"
-                                )
+                                        /*
+                                        // Uncomment when the real logo is available
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_gsa_logo),
+                                            contentDescription = "GSA Logo",
+                                            tint = GSAPurple,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        */
+                                        Text("${String.format("%.2f", result.individualWinnings)}")
+                                    }
+                                } else {
+                                    Text("Individual Game Total: ${viewModel.currencySymbol}${String.format("%.2f", result.individualWinnings)}")
+                                }
                             }
 
                             Text("Team Game: W${result.teamWins} D${result.teamDraws} L${result.teamLosses}")
-                            Text("Team Game Total: $${String.format("%.2f", result.teamWinnings)}")
+
+                            // Team game amount
+                            if (viewModel.currencySymbol == "GSA_LOGO") {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text("Team Game Total: ")
+                                    // GSA Logo placeholder
+                                    Text(
+                                        text = "GSA",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = GSAPurple
+                                    )
+                                    Text("${String.format("%.2f", result.teamWinnings)}")
+                                }
+                            } else {
+                                Text("Team Game Total: ${viewModel.currencySymbol}${String.format("%.2f", result.teamWinnings)}")
+                            }
 
                             Divider(modifier = Modifier.padding(vertical = 4.dp))
 
-                            Text(
-                                text = "Combined Total: $${
-                                    String.format(
-                                        "%.2f",
-                                        result.combinedWinnings
+                            // Combined total
+                            if (viewModel.currencySymbol == "GSA_LOGO") {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Combined Total: ",
+                                        style = MaterialTheme.typography.titleMedium
                                     )
-                                }",
-                                style = MaterialTheme.typography.titleMedium
-                            )
+                                    // GSA Logo placeholder
+                                    Text(
+                                        text = "GSA",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = GSAPurple
+                                    )
+                                    Text(
+                                        text = "${String.format("%.2f", result.combinedWinnings)}",
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                }
+                            } else {
+                                Text(
+                                    text = "Combined Total: ${viewModel.currencySymbol}${String.format("%.2f", result.combinedWinnings)}",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                            }
                         }
                     }
                 }

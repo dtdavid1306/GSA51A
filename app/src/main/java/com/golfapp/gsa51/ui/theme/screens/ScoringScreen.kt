@@ -167,7 +167,7 @@ fun ScoringScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         // Add logging to debug tooltip text
-                        val tooltipText = "Scores limited to ${viewModel.maxScoreLimit}. Change in Advanced Settings."
+                        val tooltipText = "Scores limited to ${viewModel.maxScoreLimit}. Change in Game Settings."
                         Log.d("ScoringUI", "Displaying tooltip with limit: ${viewModel.maxScoreLimit}")
                         Text(
                             text = tooltipText,
