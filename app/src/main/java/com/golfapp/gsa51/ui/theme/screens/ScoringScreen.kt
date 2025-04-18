@@ -2,9 +2,13 @@ package com.golfapp.gsa51.ui.theme.screens
 
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,28 +18,23 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.golfapp.gsa51.R
 import com.golfapp.gsa51.ui.theme.GSAPurple
+import com.golfapp.gsa51.ui.theme.components.GSATopAppBar
+import com.golfapp.gsa51.utils.HapticFeedback
 import com.golfapp.gsa51.viewmodels.AppViewModelProvider
 import com.golfapp.gsa51.viewmodels.ScoringViewModel
 import kotlinx.coroutines.delay
-import com.golfapp.gsa51.ui.theme.components.GSATopAppBar
-import com.golfapp.gsa51.ui.theme.components.GSAScoreField
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import com.golfapp.gsa51.R
-import com.golfapp.gsa51.utils.HapticFeedback
-import androidx.compose.ui.platform.LocalContext
-
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -63,7 +62,6 @@ fun ScoringScreen(
     val scoreInputs = remember { mutableStateMapOf<Long, String>() }
 
     val context = LocalContext.current
-
 
     // Par input state
     var parInput by remember { mutableStateOf("") }
@@ -115,6 +113,11 @@ fun ScoringScreen(
             viewModel.setError("Please enter a valid par value (3-5)")
         }
     }
+
+    // State variables for dropdown menus
+    var showParDropdown by remember { mutableStateOf(false) }
+    var showGoToHoleDropdown by remember { mutableStateOf(false) }
+    val playerDropdownVisible = remember { mutableStateMapOf<Long, Boolean>() }
 
     Scaffold(
         topBar = {
@@ -189,7 +192,7 @@ fun ScoringScreen(
                     .padding(vertical = 2.dp)
             )
 
-            // Go to hole row - with wider button
+            // Go to hole row - with dropdown
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -201,41 +204,66 @@ fun ScoringScreen(
                     modifier = Modifier.width(100.dp)
                 )
 
-                OutlinedTextField(
-                    value = viewModel.navigateToHoleInput,
-                    onValueChange = { viewModel.updateNavigateToHoleInput(it) },
-                    placeholder = {
-                        Text(
-                            "1-18",
-                            fontSize = 16.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    },
-                    modifier = Modifier
-                        .width(190.dp) // Slightly narrower text field
-                        .height(56.dp),
-                    singleLine = true,
-                    textStyle = LocalTextStyle.current.copy(
-                        textAlign = TextAlign.Center,
-                        fontSize = 16.sp
-                    ),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            keyboardController?.hide()
-                            viewModel.navigateToHole(viewModel.navigateToHoleInput)
+                // Dropdown for Go to Hole
+                Box(
+                    modifier = Modifier.width(190.dp)
+                ) {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .clickable { showGoToHoleDropdown = true }
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.outline,
+                                shape = RoundedCornerShape(4.dp)
+                            ),
+                        shape = RoundedCornerShape(4.dp),
+                        color = MaterialTheme.colorScheme.surface
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = viewModel.navigateToHoleInput.ifEmpty { "1-18" },
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = if (viewModel.navigateToHoleInput.isEmpty()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
+                            )
+                            Icon(
+                                imageVector = Icons.Default.ArrowDropDown,
+                                contentDescription = "Select Hole",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
-                    ),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = GSAPurple,
-                        cursorColor = GSAPurple
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                )
+                    }
+
+                    DropdownMenu(
+                        expanded = showGoToHoleDropdown,
+                        onDismissRequest = { showGoToHoleDropdown = false },
+                        modifier = Modifier.width(190.dp),
+                        properties = PopupProperties(focusable = true)
+                    ) {
+                        (1..18).forEach { hole ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = hole.toString(),
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                },
+                                onClick = {
+                                    viewModel.updateNavigateToHoleInput(hole.toString())
+                                    showGoToHoleDropdown = false
+                                }
+                            )
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.width(8.dp))
 
@@ -262,7 +290,7 @@ fun ScoringScreen(
                 }
             }
 
-// Par row - with wider button
+            // Par row - with dropdown
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -275,42 +303,67 @@ fun ScoringScreen(
                     modifier = Modifier.width(100.dp)
                 )
 
-                OutlinedTextField(
-                    value = parInput,
-                    onValueChange = {
-                        parInput = it
-                        viewModel.updatePar(it)
-                    },
-                    placeholder = {
-                        Text(
-                            "3-5",
-                            fontSize = 16.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    },
-                    modifier = Modifier
-                        .width(190.dp) // Slightly narrower text field
-                        .height(56.dp)
-                        .focusRequester(parFieldFocus),
-                    singleLine = true,
-                    textStyle = LocalTextStyle.current.copy(
-                        textAlign = TextAlign.Center,
-                        fontSize = 16.sp
-                    ),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = { handleSetPar() }
-                    ),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = if (!viewModel.isParConfirmed) Color.Red else GSAPurple,
-                        cursorColor = GSAPurple
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                )
+                // Dropdown for Par
+                Box(
+                    modifier = Modifier.width(190.dp)
+                ) {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .clickable { showParDropdown = true }
+                            .border(
+                                width = 1.dp,
+                                color = if (!viewModel.isParConfirmed) Color.Red else MaterialTheme.colorScheme.outline,
+                                shape = RoundedCornerShape(4.dp)
+                            ),
+                        shape = RoundedCornerShape(4.dp),
+                        color = MaterialTheme.colorScheme.surface
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = parInput.ifEmpty { "3-5" },
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = if (parInput.isEmpty()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
+                            )
+                            Icon(
+                                imageVector = Icons.Default.ArrowDropDown,
+                                contentDescription = "Select Par",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    DropdownMenu(
+                        expanded = showParDropdown,
+                        onDismissRequest = { showParDropdown = false },
+                        modifier = Modifier.width(190.dp),
+                        properties = PopupProperties(focusable = true)
+                    ) {
+                        (3..5).forEach { parValue ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = parValue.toString(),
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                },
+                                onClick = {
+                                    parInput = parValue.toString()
+                                    viewModel.updatePar(parValue.toString())
+                                    showParDropdown = false
+                                }
+                            )
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.width(8.dp))
 
@@ -335,6 +388,7 @@ fun ScoringScreen(
                     )
                 }
             }
+
             // Team Pairings info
             val (team1Player1, team1Player2) = viewModel.getTeamMemberNames(1)
             val (team2Player1, team2Player2) = viewModel.getTeamMemberNames(2)
@@ -349,7 +403,7 @@ fun ScoringScreen(
                 )
             }
 
-            // Player score entries - Compact
+            // Player score entries with dropdowns
             viewModel.players.forEachIndexed { index, player ->
                 Card(
                     modifier = Modifier
@@ -374,21 +428,13 @@ fun ScoringScreen(
                             fontSize = 16.sp
                         )
 
-                        GSAScoreField(
-                            value = scoreInputs[player.id] ?: "",
-                            onValueChange = { newValue ->
-                                // Check if the new value is a valid number and within the limit
-                                val score = newValue.toIntOrNull()
-                                if (score != null && score > viewModel.maxScoreLimit) {
-                                    // If invalid, clear the field completely and show error
-                                    scoreInputs[player.id] = "" // Clear the entire field
-                                    viewModel.setError("Score cannot exceed ${viewModel.maxScoreLimit}. Please enter a value between 1 and ${viewModel.maxScoreLimit}.")
-                                } else {
-                                    // If valid or empty, update normally
-                                    scoreInputs[player.id] = newValue
-                                    viewModel.updateScore(player.id, newValue)
-                                }
-                            },
+                        // Initialize dropdown state for this player if not already done
+                        if (!playerDropdownVisible.containsKey(player.id)) {
+                            playerDropdownVisible[player.id] = false
+                        }
+
+                        // Score dropdown for each player
+                        Box(
                             modifier = Modifier
                                 .width(70.dp)
                                 .then(
@@ -396,20 +442,86 @@ fun ScoringScreen(
                                         Modifier.focusRequester(firstPlayerScoreFocus)
                                     else
                                         Modifier
-                                ),
-                            keyboardActions = if (index < viewModel.players.size - 1) {
-                                KeyboardActions(
-                                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
                                 )
-                            } else {
-                                KeyboardActions(
-                                    onDone = {
-                                        keyboardController?.hide()
-                                        viewModel.autoSave()
+                        ) {
+                            Surface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(48.dp)
+                                    .clickable {
+                                        playerDropdownVisible[player.id] = true
                                     }
-                                )
+                                    .border(
+                                        width = 1.dp,
+                                        color = MaterialTheme.colorScheme.outline,
+                                        shape = RoundedCornerShape(4.dp)
+                                    ),
+                                shape = RoundedCornerShape(4.dp),
+                                color = if ((scoreInputs[player.id] ?: "").isNotEmpty())
+                                    Color(0xFFE8F5E9) // Light green for valid score
+                                else
+                                    MaterialTheme.colorScheme.surface
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = scoreInputs[player.id] ?: "#",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.weight(1f),
+                                        color = if ((scoreInputs[player.id] ?: "").isEmpty())
+                                            Color.Gray
+                                        else
+                                            MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowDropDown,
+                                        contentDescription = "Select Score",
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
-                        )
+
+                            // Score dropdown menu
+                            DropdownMenu(
+                                expanded = playerDropdownVisible[player.id] == true,
+                                onDismissRequest = { playerDropdownVisible[player.id] = false },
+                                modifier = Modifier.width(70.dp),
+                                properties = PopupProperties(focusable = true)
+                            ) {
+                                // Create score options from 1 to maxScoreLimit
+                                (1..viewModel.maxScoreLimit).forEach { score ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                text = score.toString(),
+                                                textAlign = TextAlign.Center,
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
+                                        },
+                                        onClick = {
+                                            val newValue = score.toString()
+                                            scoreInputs[player.id] = newValue
+                                            viewModel.updateScore(player.id, newValue)
+                                            playerDropdownVisible[player.id] = false
+
+                                            // Move focus to next player if not the last one
+                                            if (index < viewModel.players.size - 1) {
+                                                focusManager.moveFocus(FocusDirection.Down)
+                                            } else {
+                                                keyboardController?.hide()
+                                                viewModel.autoSave()
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

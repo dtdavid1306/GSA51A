@@ -17,6 +17,13 @@ import androidx.compose.ui.text.input.VisualTransformation
 import com.golfapp.gsa51.ui.theme.GSAPurple
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.getValue
@@ -27,6 +34,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.Icon
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,7 +86,8 @@ fun GSAScoreField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
-    maxValue: Int = Int.MAX_VALUE // Add this parameter
+    maxValue: Int = Int.MAX_VALUE, // Maximum value parameter
+    dropdownEnabled: Boolean = true // New parameter to enable dropdown mode
 ) {
     // Determine if we have a valid score (non-empty)
     val hasValidInput = remember(value) { derivedStateOf { value.isNotEmpty() } }
@@ -82,29 +98,95 @@ fun GSAScoreField(
         label = "scoreFieldBackground"
     )
 
-    OutlinedTextField(
-        value = value,
-        onValueChange = { newValue ->
-            // For simple validation: If new value is empty, or is a number that's within the limit, accept it
-            if (newValue.isEmpty() ||
-                (newValue.all { it.isDigit() } && newValue.toIntOrNull()?.let { it <= maxValue } ?: false)) {
-                onValueChange(newValue)
+    // Dropdown state
+    var expanded by remember { mutableStateOf(false) }
+
+    // If dropdown is enabled, use the dropdown version
+    if (dropdownEnabled) {
+        Box(
+            modifier = modifier
+                .clip(MaterialTheme.shapes.small)
+                .background(backgroundColor)
+        ) {
+            OutlinedTextField(
+                value = value,
+                onValueChange = { /* No direct input in dropdown mode */ },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text(text = "#", color = Color.Gray, textAlign = TextAlign.Center) },
+                singleLine = true,
+                readOnly = true,
+                textStyle = androidx.compose.ui.text.TextStyle(
+                    textAlign = TextAlign.Center
+                ),
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = "Select Score",
+                        tint = GSAPurple,
+                        modifier = Modifier.clickable { expanded = true }
+                    )
+                },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = GSAPurple,
+                    cursorColor = GSAPurple
+                ),
+            )
+
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clickable { expanded = true }
+            )
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.width(100.dp)
+            ) {
+                // Create score options from 1 to maxValue
+                (1..maxValue).forEach { score ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = score.toString(),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        },
+                        onClick = {
+                            onValueChange(score.toString())
+                            expanded = false
+                        }
+                    )
+                }
             }
-            // Otherwise, silently reject (don't update the value)
-        },
-        modifier = modifier
-            .clip(MaterialTheme.shapes.small)
-            .background(backgroundColor),
-        placeholder = { Text(text = "#", color = Color.Gray) },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Number,
-            imeAction = if (keyboardActions.onNext != null) ImeAction.Next else ImeAction.Done
-        ),
-        keyboardActions = keyboardActions,
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedBorderColor = GSAPurple,
-            cursorColor = GSAPurple
+        }
+    } else {
+        // Original implementation for text input
+        OutlinedTextField(
+            value = value,
+            onValueChange = { newValue ->
+                // For simple validation: If new value is empty, or is a number that's within the limit, accept it
+                if (newValue.isEmpty() ||
+                    (newValue.all { it.isDigit() } && newValue.toIntOrNull()?.let { it <= maxValue } ?: false)) {
+                    onValueChange(newValue)
+                }
+                // Otherwise, silently reject (don't update the value)
+            },
+            modifier = modifier
+                .clip(MaterialTheme.shapes.small)
+                .background(backgroundColor),
+            placeholder = { Text(text = "#", color = Color.Gray) },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = if (keyboardActions.onNext != null) ImeAction.Next else ImeAction.Done
+            ),
+            keyboardActions = keyboardActions,
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = GSAPurple,
+                cursorColor = GSAPurple
+            )
         )
-    )
+    }
 }

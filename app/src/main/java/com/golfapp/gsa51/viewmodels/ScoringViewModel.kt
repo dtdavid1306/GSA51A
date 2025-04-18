@@ -98,6 +98,7 @@ class ScoringViewModel(
                 game?.let {
                     if (currentHole == 1) { // Only set if not already navigated
                         currentHole = it.startingHole
+                        navigateToHoleInput = it.startingHole.toString() // Update dropdown value
                     }
                 }
                 updateCurrentSection()
@@ -210,8 +211,7 @@ class ScoringViewModel(
         }
     }
 
-
-
+    // Updated to handle dropdown selection
     fun updateScore(playerId: Long, scoreStr: String) {
         Log.d("ScoringVM", "Validating score: $scoreStr against limit: $maxScoreLimit")
 
@@ -236,17 +236,27 @@ class ScoringViewModel(
                 put(playerId, score)
             }
             hasUnsavedChanges = true
+        } else if (scoreStr.isEmpty()) {
+            // Handle empty string case (clear the score)
+            scores = scores.toMutableMap().apply {
+                remove(playerId)
+            }
+            hasUnsavedChanges = true
         }
     }
 
-
-    // Update the updatePar method to reset confirmation
+    // Updated for dropdown selection
     fun updatePar(parStr: String) {
         val par = parStr.toIntOrNull()
         if (par != null && par in 3..5) {
             holePar = par
             hasUnsavedChanges = true
             // Reset par confirmation when par is changed
+            isParConfirmed = false
+        } else if (parStr.isEmpty()) {
+            // Handle empty string case (clear the par)
+            holePar = null
+            hasUnsavedChanges = true
             isParConfirmed = false
         }
     }
@@ -310,6 +320,7 @@ class ScoringViewModel(
             autoSave {
                 // Allow circular navigation from hole 18 to hole 1
                 currentHole = if (currentHole == 18) 1 else currentHole + 1
+                navigateToHoleInput = currentHole.toString() // Update dropdown value
                 loadScoresForCurrentHole()
                 updateCurrentSection()
                 updateCurrentHoleInGame()
@@ -317,6 +328,7 @@ class ScoringViewModel(
         } else {
             // Allow circular navigation from hole 18 to hole 1
             currentHole = if (currentHole == 18) 1 else currentHole + 1
+            navigateToHoleInput = currentHole.toString() // Update dropdown value
             loadScoresForCurrentHole()
             updateCurrentSection()
             updateCurrentHoleInGame()
@@ -329,6 +341,7 @@ class ScoringViewModel(
             autoSave {
                 // Allow circular navigation from hole 1 to hole 18
                 currentHole = if (currentHole == 1) 18 else currentHole - 1
+                navigateToHoleInput = currentHole.toString() // Update dropdown value
                 loadScoresForCurrentHole()
                 updateCurrentSection()
                 updateCurrentHoleInGame()
@@ -336,29 +349,30 @@ class ScoringViewModel(
         } else {
             // Allow circular navigation from hole 1 to hole 18
             currentHole = if (currentHole == 1) 18 else currentHole - 1
+            navigateToHoleInput = currentHole.toString() // Update dropdown value
             loadScoresForCurrentHole()
             updateCurrentSection()
             updateCurrentHoleInGame()
         }
     }
 
-    // Navigate to specific hole - UPDATED: removed Par validation
+    // Updated for dropdown selection
     fun navigateToHole(holeStr: String) {
         val hole = holeStr.toIntOrNull()
         if (hole != null && hole in 1..18) {
             if (hasUnsavedChanges) {
                 autoSave {
                     currentHole = hole
+                    navigateToHoleInput = hole.toString() // Update dropdown value
                     loadScoresForCurrentHole()
                     updateCurrentSection()
-                    navigateToHoleInput = ""
                     updateCurrentHoleInGame()
                 }
             } else {
                 currentHole = hole
+                navigateToHoleInput = hole.toString() // Update dropdown value
                 loadScoresForCurrentHole()
                 updateCurrentSection()
-                navigateToHoleInput = ""
                 updateCurrentHoleInGame()
             }
         } else {
@@ -379,6 +393,7 @@ class ScoringViewModel(
         }
         return false
     }
+
     // Update current hole in the game entity
     private fun updateCurrentHoleInGame() {
         viewModelScope.launch {
